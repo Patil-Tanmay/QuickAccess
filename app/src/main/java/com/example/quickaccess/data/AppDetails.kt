@@ -9,6 +9,7 @@ data class AppDetails(
     val id : Int?=null,
     val name : String,
     val packageName : String,
-    val image : Drawable
+    val image : Drawable,
+    val isSystemPackage : Boolean
 ) {
 }

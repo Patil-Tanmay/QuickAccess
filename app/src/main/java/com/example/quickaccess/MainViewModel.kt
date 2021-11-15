@@ -23,29 +23,9 @@ class MainViewModel @Inject constructor(
     private var _refreshStatus: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val refreshStatus get() = _refreshStatus.asStateFlow()
 
-
     init {
 
     }
-
-
-//    fun getInstalledApps() {
-//        val application = getApplication<Application>()
-//
-//        val pm = application.packageManager
-//        val packs = pm.getInstalledPackages(0)
-//        for (i in packs.indices) {
-//            val p = packs[i]
-//            if (!isSystemPackage(p)) {
-//
-//                Log.d("TAGG", "getInstalledApps: ${p.applicationInfo.loadLabel(pm)} ")
-//                Log.d("TAGG", "getInstalledApps: ${p.applicationInfo.loadIcon(pm)} ")
-//                Log.d("TAGG", "getInstalledApps: ${p.applicationInfo.packageName} ")
-//            }
-//
-//        }
-//    }
-
 
     fun getInstalledApps() =
         _refreshStatus.flatMapLatest { refresh ->
@@ -59,13 +39,22 @@ class MainViewModel @Inject constructor(
                     for (i in packs.indices) {
                         val p = packs[i]
                         if (!isSystemPackage(p)) {
-//                    val bitmap = BitmapFactory.decodeResource(application.resources)
 
                             list.add(
                                 AppDetails(
                                     name = p.applicationInfo.loadLabel(pm).toString(),
                                     packageName = p.applicationInfo.packageName.toString(),
-                                    image = p.applicationInfo.loadIcon(pm)
+                                    image = p.applicationInfo.loadIcon(pm),
+                                    isSystemPackage = false
+                                )
+                            )
+                        } else {
+                            list.add(
+                                AppDetails(
+                                    name = p.applicationInfo.loadLabel(pm).toString(),
+                                    packageName = p.applicationInfo.packageName.toString(),
+                                    image = p.applicationInfo.loadIcon(pm),
+                                    isSystemPackage = true
                                 )
                             )
                         }
@@ -84,7 +73,7 @@ class MainViewModel @Inject constructor(
         _refreshStatus.value = true
     }
 
-    fun stopRefresh(){
+    fun stopRefresh() {
         _refreshStatus.value = false
     }
 
