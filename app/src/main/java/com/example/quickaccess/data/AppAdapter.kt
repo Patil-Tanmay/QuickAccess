@@ -11,7 +11,7 @@ class AppAdapter constructor(
     val onUninstall: (String) -> Unit
 ) : RecyclerView.Adapter<AppAdapter.AppViewHolder>(){
 
-    private lateinit var list : List<AppDetails>
+    private var list  = arrayListOf<AppDetails>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AppViewHolder {
         return AppViewHolder(ItemAppBinding.inflate(LayoutInflater.from(parent.context),parent,false),
@@ -34,7 +34,7 @@ class AppAdapter constructor(
     }
 
     fun setAppData(listApps : List<AppDetails>){
-        this.list = listApps
+        this.list.addAll(listApps)
     }
 
     class AppViewHolder(

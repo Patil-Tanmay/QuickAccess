@@ -27,7 +27,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="center"
         android:background="#252525"
-        android:visibility="visible">
+        android:visibility="gone">
 
         <ImageView
             android:id="@+id/close_search_button"

@@ -61,36 +61,36 @@ class MainActivity : AppCompatActivity() {
 
         setupRecView(adapter)
 
-        binding.refreshLayout.setOnRefreshListener {
-            viewModel.onRefresh()
-        }
+//        binding.refreshLayout.setOnRefreshListener {
+//            viewModel.onRefresh()
+//        }
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
 
                 //showing Progressbar
-                launch {
-                    viewModel.refreshStatus.collect {
-                        Log.d(TAG, "onCreate: $it")
-                        if (it) {
-                            binding.pBar.visibility = View.VISIBLE
-                            binding.refreshLayout.isRefreshing = true
-                            binding.recView.visibility = View.GONE
-                        } else {
-                            binding.pBar.visibility = View.GONE
-                            binding.refreshLayout.isRefreshing = false
-                            binding.recView.visibility = View.VISIBLE
-                        }
-                    }
-                }
-
-                launch {
-                    viewModel.getInstalledApps().collect {
-                        Log.d(TAG, "onCreate: ${it.size}")
-                        adapter.setAppData(it)
-                        adapter.notifyDataSetChanged()
-                    }
-                }
+//                launch {
+//                    viewModel.refreshStatus.collect {
+//                        Log.d(TAG, "onCreate: $it")
+//                        if (it) {
+//                            binding.pBar.visibility = View.VISIBLE
+//                            binding.refreshLayout.isRefreshing = true
+//                            binding.recView.visibility = View.GONE
+//                        } else {
+//                            binding.pBar.visibility = View.GONE
+//                            binding.refreshLayout.isRefreshing = false
+//                            binding.recView.visibility = View.VISIBLE
+//                        }
+//                    }
+//                }
+//
+//                launch {
+//                    viewModel.getInstalledApps().collect {
+//                        Log.d(TAG, "onCreate: ${it.size}")
+//                        adapter.setAppData(it)
+//                        adapter.notifyDataSetChanged()
+//                    }
+//                }
             }
         }
     }//end of onCreate

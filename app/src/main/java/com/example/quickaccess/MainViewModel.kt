@@ -5,9 +5,12 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import com.example.quickaccess.data.AppDetails
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -24,9 +27,34 @@ class MainViewModel @Inject constructor(
     private var _refreshStatus: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val refreshStatus get() = _refreshStatus.asStateFlow()
 
-    init {
+    private val _liveDate = MutableLiveData<List<AppDetails>>()
+    val liveData: LiveData<List<AppDetails>>
+        get() = _liveDate
 
+    init {
+        viewModelScope.launch {
+            _liveDate.value = getList(application.packageManager)
+        }
     }
+
+    private suspend fun getList(packageManager: PackageManager) = withContext(Dispatchers.IO) {
+        packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
+            .filter { packageManager.getLaunchIntentForPackage(it.packageName) != null }
+            .parallelMap {
+                AppDetails(
+                    packageName = it.packageName,
+                    name = packageManager.getApplicationLabel(it).toString(),
+                    image = it.loadIcon(packageManager),
+                    isSystemPackage = false
+                )
+            }
+    }
+
+
+    private suspend fun <A, B> Iterable<A>.parallelMap(f: suspend (A) -> B): List<B> =
+        coroutineScope {
+            map { async { f(it) } }.awaitAll()
+        }
 
     fun getInstalledApps() =
         _refreshStatus.flatMapLatest { refresh ->
