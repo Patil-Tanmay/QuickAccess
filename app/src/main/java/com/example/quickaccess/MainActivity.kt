@@ -38,10 +38,16 @@ class MainActivity : AppCompatActivity() {
 
     private val result =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            if (it.resultCode == RESULT_CANCELED && it.data != null) {
+            if (it.resultCode == RESULT_OK) {
                 Toast.makeText(this, "Cancelled", Toast.LENGTH_SHORT).show()
             }
         }
+
+    private val unInstallApp = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
+        if (it.resultCode == RESULT_OK){
+            Toast.makeText(this, "Successfully Uninstalled", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -117,7 +123,7 @@ class MainActivity : AppCompatActivity() {
         val intent = Intent(Intent.ACTION_DELETE)
         intent.data = Uri.parse("package:$packageName")
         intent.putExtra(Intent.EXTRA_RETURN_RESULT, true)
-        startActivity(intent)
+        unInstallApp.launch(intent)
 
     }
 

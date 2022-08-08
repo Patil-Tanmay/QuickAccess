@@ -12,7 +12,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 
 import com.example.quickaccess.databinding.ViewSearchBinding
 
-class SearchView constructor(
+class SearchView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0

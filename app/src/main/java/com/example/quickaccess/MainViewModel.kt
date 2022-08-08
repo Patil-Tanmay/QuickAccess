@@ -3,6 +3,7 @@ package com.example.quickaccess
 import android.app.Application
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
 import androidx.lifecycle.AndroidViewModel
 import com.example.quickaccess.data.AppDetails
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -35,11 +36,10 @@ class MainViewModel @Inject constructor(
 //                    list.clear()
                     val application = getApplication<Application>()
                     val pm = application.packageManager
-                    val packs = pm.getInstalledPackages(0)
+                    val packs = pm.getInstalledPackages(PackageManager.GET_META_DATA)
                     for (i in packs.indices) {
                         val p = packs[i]
                         if (!isSystemPackage(p)) {
-
                             list.add(
                                 AppDetails(
                                     name = p.applicationInfo.loadLabel(pm).toString(),
@@ -48,16 +48,17 @@ class MainViewModel @Inject constructor(
                                     isSystemPackage = false
                                 )
                             )
-                        } else {
-                            list.add(
-                                AppDetails(
-                                    name = p.applicationInfo.loadLabel(pm).toString(),
-                                    packageName = p.applicationInfo.packageName.toString(),
-                                    image = p.applicationInfo.loadIcon(pm),
-                                    isSystemPackage = true
-                                )
-                            )
                         }
+//                        else {
+//                            list.add(
+//                                AppDetails(
+//                                    name = p.applicationInfo.loadLabel(pm).toString(),
+//                                    packageName = p.applicationInfo.packageName.toString(),
+//                                    image = p.applicationInfo.loadIcon(pm),
+//                                    isSystemPackage = true
+//                                )
+//                            )
+//                        }
                         emit(list.toList())
                         _refreshStatus.value = false
                     }
