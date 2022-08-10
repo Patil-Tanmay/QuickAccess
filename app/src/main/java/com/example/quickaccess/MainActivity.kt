@@ -1,10 +1,12 @@
 package com.example.quickaccess
 
+import android.animation.Animator
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.ViewAnimationUtils
 import android.widget.Toast
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.contract.ActivityResultContract
@@ -61,6 +63,11 @@ class MainActivity : AppCompatActivity() {
 
         setupRecView(adapter)
 
+        binding.openSearchButton.setOnClickListener { openSearch() }
+        binding.closeSearchButton.setOnClickListener { closeSearch() }
+
+
+
 //        binding.refreshLayout.setOnRefreshListener {
 //            viewModel.onRefresh()
 //        }
@@ -93,6 +100,12 @@ class MainActivity : AppCompatActivity() {
 //                }
             }
         }
+
+        viewModel.liveData.observe(this){
+            adapter.setAppData(it)
+            adapter.notifyDataSetChanged()
+        }
+
     }//end of onCreate
 
 
@@ -125,6 +138,55 @@ class MainActivity : AppCompatActivity() {
         intent.putExtra(Intent.EXTRA_RETURN_RESULT, true)
         unInstallApp.launch(intent)
 
+    }
+
+    private fun openSearch() {
+        binding.searchInputText.setText("")
+//        search_input_text.addTextChangedListener( object : TextWatcher{
+//            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+//                TODO("Not yet implemented")
+//            }
+//
+//            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+//                Toast.makeText(context,"${search_input_text.text.toString()}",Toast.LENGTH_SHORT).show()
+//            }
+//
+//            override fun afterTextChanged(s: Editable?) {
+//                TODO("Not yet implemented")
+//            }
+//        }
+//        )
+        binding.searchOpenView.visibility = View.VISIBLE
+        val circularReveal = ViewAnimationUtils.createCircularReveal(
+            binding.searchOpenView,
+            (binding.openSearchButton.right + binding.openSearchButton.left) / 2,
+            (binding.openSearchButton.top + binding.openSearchButton.bottom) / 2,
+            0f, binding.searchLayout.width.toFloat()
+        )
+        circularReveal.duration = 350
+        circularReveal.start()
+    }
+
+    private fun closeSearch() {
+        val circularConceal = ViewAnimationUtils.createCircularReveal(
+            binding.searchOpenView,
+            (binding.openSearchButton.right + binding.openSearchButton.left) / 2,
+            (binding.openSearchButton.top + binding.openSearchButton.bottom) / 2,
+            binding.searchLayout.width.toFloat(), 0f
+        )
+
+        circularConceal.duration = 350
+        circularConceal.start()
+        circularConceal.addListener(object : Animator.AnimatorListener {
+            override fun onAnimationRepeat(animation: Animator?) = Unit
+            override fun onAnimationCancel(animation: Animator?) = Unit
+            override fun onAnimationStart(animation: Animator?) = Unit
+            override fun onAnimationEnd(animation: Animator?) {
+                binding.searchOpenView.visibility = View.INVISIBLE
+                binding.searchInputText.setText("")
+                circularConceal.removeAllListeners()
+            }
+        })
     }
 
     //useless code

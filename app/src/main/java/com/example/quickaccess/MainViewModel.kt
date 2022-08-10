@@ -39,8 +39,11 @@ class MainViewModel @Inject constructor(
 
     private suspend fun getList(packageManager: PackageManager) = withContext(Dispatchers.IO) {
         packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
-            .filter { packageManager.getLaunchIntentForPackage(it.packageName) != null }
-            .parallelMap {
+            .filter {
+                packageManager.getLaunchIntentForPackage(it.packageName) != null
+            }
+            .map {
+                if (!isSystemPackage())
                 AppDetails(
                     packageName = it.packageName,
                     name = packageManager.getApplicationLabel(it).toString(),
@@ -67,7 +70,7 @@ class MainViewModel @Inject constructor(
                     val packs = pm.getInstalledPackages(PackageManager.GET_META_DATA)
                     for (i in packs.indices) {
                         val p = packs[i]
-                        if (!isSystemPackage(p)) {
+//                        if (!isSystemPackage(p)) {
                             list.add(
                                 AppDetails(
                                     name = p.applicationInfo.loadLabel(pm).toString(),
@@ -76,7 +79,7 @@ class MainViewModel @Inject constructor(
                                     isSystemPackage = false
                                 )
                             )
-                        }
+//                        }
 //                        else {
 //                            list.add(
 //                                AppDetails(
@@ -107,8 +110,8 @@ class MainViewModel @Inject constructor(
     }
 
 
-    private fun isSystemPackage(pkgInfo: PackageInfo): Boolean {
-        return pkgInfo.applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM != 0
+    private fun isSystemPackage(pkgInfo: ApplicationInfo): Boolean {
+        return pkgInfo.flags and ApplicationInfo.FLAG_SYSTEM != 0
     }
 
 
