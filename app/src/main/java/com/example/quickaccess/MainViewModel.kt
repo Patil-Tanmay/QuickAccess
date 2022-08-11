@@ -43,13 +43,21 @@ class MainViewModel @Inject constructor(
                 packageManager.getLaunchIntentForPackage(it.packageName) != null
             }
             .map {
-                if (!isSystemPackage())
-                AppDetails(
-                    packageName = it.packageName,
-                    name = packageManager.getApplicationLabel(it).toString(),
-                    image = it.loadIcon(packageManager),
-                    isSystemPackage = false
-                )
+                if (!isSystemPackage(it)) {
+                    AppDetails(
+                        packageName = it.packageName,
+                        name = packageManager.getApplicationLabel(it).toString(),
+                        image = it.loadIcon(packageManager),
+                        isSystemPackage = false
+                    )
+                } else{
+                    AppDetails(
+                        packageName = it.packageName,
+                        name = packageManager.getApplicationLabel(it).toString(),
+                        image = it.loadIcon(packageManager),
+                        isSystemPackage = true
+                    )
+                }
             }
     }
 
