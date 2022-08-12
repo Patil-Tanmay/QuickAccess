@@ -27,6 +27,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import utils.Resource
+import utils.hideKeyboard
+import utils.showKeyBoard
 
 
 @AndroidEntryPoint
@@ -67,13 +69,16 @@ class MainActivity : AppCompatActivity() {
         )
         setupRecView(adapter)
 
-        binding.openSearchButton.setOnClickListener { openSearch() }
+        binding.openSearchButton.setOnClickListener {
+            binding.searchInputText.requestFocus()
+            binding.searchInputText.showKeyBoard()
+            openSearch()
+        }
         binding.closeSearchButton.setOnClickListener {
             viewModel.setQuery(null)
+            this.hideKeyboard()
             closeSearch()
         }
-
-
 
         binding.refreshLayout.setOnRefreshListener {
             viewModel.onRefresh()
