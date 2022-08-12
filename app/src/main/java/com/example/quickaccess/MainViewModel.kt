@@ -2,121 +2,82 @@ package com.example.quickaccess
 
 import android.app.Application
 import android.content.pm.ApplicationInfo
-import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.example.quickaccess.data.AppDetails
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
+import utils.Resource
 import javax.inject.Inject
 
 
 @HiltViewModel
-class MainViewModel @Inject constructor(
-    application: Application,
-//    val db : AppDatabase
-) : AndroidViewModel(application) {
+class MainViewModel @Inject constructor(val app: Application) : AndroidViewModel(app) {
 
-    private var _refreshStatus: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val refreshStatus get() = _refreshStatus.asStateFlow()
+    private var _appList: MutableSharedFlow<Resource<List<AppDetails>>> = MutableSharedFlow()
+    val appListt get() = _appList.asSharedFlow()
 
-    private val _liveDate = MutableLiveData<List<AppDetails>>()
-    val liveData: LiveData<List<AppDetails>>
-        get() = _liveDate
+    private var appList = arrayListOf<AppDetails>()
+
+    private var currentQuery : String ?= null
 
     init {
+        getList(app.packageManager)
+    }
+
+    private fun getList(packageManager: PackageManager) {
         viewModelScope.launch {
-            _liveDate.value = getList(application.packageManager)
-        }
-    }
-
-    private suspend fun getList(packageManager: PackageManager) = withContext(Dispatchers.IO) {
-        packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
-            .filter {
-                packageManager.getLaunchIntentForPackage(it.packageName) != null
-            }
-            .map {
-                if (!isSystemPackage(it)) {
-                    AppDetails(
-                        packageName = it.packageName,
-                        name = packageManager.getApplicationLabel(it).toString(),
-                        image = it.loadIcon(packageManager),
-                        isSystemPackage = false
-                    )
-                } else{
-                    AppDetails(
-                        packageName = it.packageName,
-                        name = packageManager.getApplicationLabel(it).toString(),
-                        image = it.loadIcon(packageManager),
-                        isSystemPackage = true
-                    )
-                }
-            }
-    }
-
-
-    private suspend fun <A, B> Iterable<A>.parallelMap(f: suspend (A) -> B): List<B> =
-        coroutineScope {
-            map { async { f(it) } }.awaitAll()
-        }
-
-    fun getInstalledApps() =
-        _refreshStatus.flatMapLatest { refresh ->
-            val list = mutableListOf<AppDetails>()
-            flow {
-                if (refresh) {
-//                    list.clear()
-                    val application = getApplication<Application>()
-                    val pm = application.packageManager
-                    val packs = pm.getInstalledPackages(PackageManager.GET_META_DATA)
-                    for (i in packs.indices) {
-                        val p = packs[i]
-//                        if (!isSystemPackage(p)) {
-                            list.add(
-                                AppDetails(
-                                    name = p.applicationInfo.loadLabel(pm).toString(),
-                                    packageName = p.applicationInfo.packageName.toString(),
-                                    image = p.applicationInfo.loadIcon(pm),
-                                    isSystemPackage = false
-                                )
-                            )
-//                        }
-//                        else {
-//                            list.add(
-//                                AppDetails(
-//                                    name = p.applicationInfo.loadLabel(pm).toString(),
-//                                    packageName = p.applicationInfo.packageName.toString(),
-//                                    image = p.applicationInfo.loadIcon(pm),
-//                                    isSystemPackage = true
-//                                )
-//                            )
-//                        }
-                        emit(list.toList())
-                        _refreshStatus.value = false
+            _appList.emit(Resource.Loading)
+            val listOfApps =
+                packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
+                    .filter {
+                        packageManager.getLaunchIntentForPackage(it.packageName) != null
+                    }.map { applicationInfo ->
+                        AppDetails(
+                            packageName = applicationInfo.packageName,
+                            name = packageManager.getApplicationLabel(applicationInfo)
+                                .toString(),
+                            image = applicationInfo.loadIcon(packageManager),
+                            isSystemPackage = isSystemPackage(applicationInfo)
+                        )
                     }
-                }
-//                else {
-//                    emit(list.toList())
-////                    _refreshStatus.value = false
-//                }
+//            _refreshStatus.emit(false)
+            if (currentQuery != null){
+                appList.clear()
+                appList.addAll(listOfApps)
+                filterAppList(currentQuery!!)
+            }else {
+                appList.clear()
+                appList.addAll(listOfApps)
+                _appList.emit(Resource.Success(listOfApps))
             }
         }
+
+    }
+
+    fun filterAppList(appName: String){
+        viewModelScope.launch {
+            if (appName != "") {
+                val newList = appList.filter {
+                    it.name.contains(appName, true)
+                }
+                setQuery(appName)
+                _appList.emit(Resource.Success(newList))
+            } else {
+                setQuery(null)
+                _appList.emit(Resource.Success(appList))
+            }
+        }
+    }
+
+     fun setQuery(query: String?){
+        currentQuery = query
+    }
 
     fun onRefresh() {
-        _refreshStatus.value = true
+        getList(app.packageManager)
     }
-
-    fun stopRefresh() {
-        _refreshStatus.value = false
-    }
-
 
     private fun isSystemPackage(pkgInfo: ApplicationInfo): Boolean {
         return pkgInfo.flags and ApplicationInfo.FLAG_SYSTEM != 0

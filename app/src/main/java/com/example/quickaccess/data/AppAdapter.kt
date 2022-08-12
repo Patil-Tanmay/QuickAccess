@@ -34,6 +34,7 @@ class AppAdapter constructor(
     }
 
     fun setAppData(listApps : List<AppDetails>){
+        this.list.clear()
         this.list.addAll(listApps)
     }
 

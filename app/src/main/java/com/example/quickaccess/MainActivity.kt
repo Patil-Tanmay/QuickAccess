@@ -13,16 +13,20 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.quickaccess.data.AppAdapter
+import com.example.quickaccess.data.AppDetails
 import com.example.quickaccess.databinding.ActivityMainBinding
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import utils.Resource
 
 
 @AndroidEntryPoint
@@ -45,11 +49,12 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-    private val unInstallApp = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
-        if (it.resultCode == RESULT_OK){
-            Toast.makeText(this, "Successfully Uninstalled", Toast.LENGTH_SHORT).show()
+    private val unInstallApp =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode == RESULT_OK) {
+                Toast.makeText(this, "Successfully Uninstalled", Toast.LENGTH_SHORT).show()
+            }
         }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,50 +65,58 @@ class MainActivity : AppCompatActivity() {
             ::onSelect,
             ::onUninstall
         )
-
         setupRecView(adapter)
 
         binding.openSearchButton.setOnClickListener { openSearch() }
-        binding.closeSearchButton.setOnClickListener { closeSearch() }
+        binding.closeSearchButton.setOnClickListener {
+            viewModel.setQuery(null)
+            closeSearch()
+        }
 
 
 
-//        binding.refreshLayout.setOnRefreshListener {
-//            viewModel.onRefresh()
-//        }
+        binding.refreshLayout.setOnRefreshListener {
+            viewModel.onRefresh()
+        }
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
 
-                //showing Progressbar
-//                launch {
-//                    viewModel.refreshStatus.collect {
-//                        Log.d(TAG, "onCreate: $it")
-//                        if (it) {
-//                            binding.pBar.visibility = View.VISIBLE
-//                            binding.refreshLayout.isRefreshing = true
-//                            binding.recView.visibility = View.GONE
-//                        } else {
-//                            binding.pBar.visibility = View.GONE
-//                            binding.refreshLayout.isRefreshing = false
-//                            binding.recView.visibility = View.VISIBLE
-//                        }
-//                    }
-//                }
-//
-//                launch {
-//                    viewModel.getInstalledApps().collect {
-//                        Log.d(TAG, "onCreate: ${it.size}")
-//                        adapter.setAppData(it)
-//                        adapter.notifyDataSetChanged()
-//                    }
-//                }
-            }
-        }
+                launch {
+                    viewModel.appListt.collect { resource ->
+                        when (resource) {
+                            is Resource.Loading -> {
+                                binding.pBar.visibility = View.VISIBLE
+                                binding.refreshLayout.isRefreshing = true
+                                binding.recView.visibility = View.GONE
+                            }
 
-        viewModel.liveData.observe(this){
-            adapter.setAppData(it)
-            adapter.notifyDataSetChanged()
+                            is Resource.Success -> {
+                                binding.pBar.visibility = View.GONE
+                                binding.refreshLayout.isRefreshing = false
+                                binding.recView.visibility = View.VISIBLE
+
+//                                Log.d(TAG, "onCreate: ${it.size}")
+                                adapter.setAppData(resource.data!!)
+                                adapter.notifyDataSetChanged()
+
+                            }
+                            is Resource.Error -> {
+                                binding.pBar.visibility = View.GONE
+                                binding.refreshLayout.isRefreshing = false
+                                binding.recView.visibility = View.VISIBLE
+
+                                Snackbar.make(
+                                    binding.root,
+                                    "Error! Please relaunch the app.",
+                                    Snackbar.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+
+                    }
+                }
+            }
         }
 
     }//end of onCreate
@@ -128,7 +141,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        viewModel.onRefresh()
+//        viewModel.onRefresh()
     }
 
 
@@ -141,21 +154,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun openSearch() {
-        binding.searchInputText.setText("")
-//        search_input_text.addTextChangedListener( object : TextWatcher{
-//            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-//                TODO("Not yet implemented")
-//            }
-//
-//            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-//                Toast.makeText(context,"${search_input_text.text.toString()}",Toast.LENGTH_SHORT).show()
-//            }
-//
-//            override fun afterTextChanged(s: Editable?) {
-//                TODO("Not yet implemented")
-//            }
-//        }
-//        )
+        binding.searchInputText.addTextChangedListener {
+            if (!binding.searchInputText.text.isNullOrBlank()) {
+                viewModel.filterAppList(it.toString())
+            } else if (binding.searchInputText.text.isBlank()) {
+                viewModel.filterAppList("")
+            }
+        }
+
+
         binding.searchOpenView.visibility = View.VISIBLE
         val circularReveal = ViewAnimationUtils.createCircularReveal(
             binding.searchOpenView,
