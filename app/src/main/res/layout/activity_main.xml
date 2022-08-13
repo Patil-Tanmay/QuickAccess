@@ -26,6 +26,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
+                android:visibility="visible"
                 android:background="@color/purple_500">
 
                 <TextView
@@ -73,8 +74,10 @@
                     android:layout_marginEnd="16dp"
                     android:layout_toEndOf="@id/close_search_button"
                     android:hint="Search..."
-                    android:textColor="@color/black"
-                    android:textColorHint="#FFFFFF" />
+                    android:textColorHint="@color/white"
+                    android:cursorVisible="true"
+                    android:textColor="@color/white"
+                    android:background="@drawable/bg_editext" />
 
             </RelativeLayout>
 

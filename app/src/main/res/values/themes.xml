@@ -19,4 +19,11 @@
 <!--        <item name="colorAccent">@color/colorAccent</item>-->
 
     </style>
+
+    <style name="Theme.test" parent="Theme.MaterialComponents.Light.NoActionBar">
+    <!-- Primary brand color. -->
+    <item name="colorPrimary">#0148FF</item>
+    <item name="colorPrimaryVariant">@color/black</item>
+    <item name="colorOnPrimary">@color/white</item>
+    </style>
 </resources>
