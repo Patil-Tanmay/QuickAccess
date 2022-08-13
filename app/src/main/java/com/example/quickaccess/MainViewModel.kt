@@ -53,7 +53,6 @@ class MainViewModel @Inject constructor(val app: Application) : AndroidViewModel
                 _appList.emit(Resource.Success(listOfApps))
             }
         }
-
     }
 
     fun filterAppList(appName: String){
