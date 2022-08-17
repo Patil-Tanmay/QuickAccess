@@ -8,8 +8,6 @@ import android.util.Log
 import android.view.View
 import android.view.ViewAnimationUtils
 import android.widget.Toast
-import androidx.activity.result.ActivityResultCallback
-import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -19,12 +17,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.quickaccess.data.AppAdapter
-import com.example.quickaccess.data.AppDetails
 import com.example.quickaccess.databinding.ActivityMainBinding
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import utils.Resource
 import utils.hideKeyboard
@@ -65,7 +60,8 @@ class MainActivity : AppCompatActivity() {
 
         adapter = AppAdapter(
             ::onSelect,
-            ::onUninstall
+            ::onUninstall,
+            ::setPackageNameForQuickAccess
         )
         setupRecView(adapter)
 
@@ -149,6 +145,9 @@ class MainActivity : AppCompatActivity() {
 //        viewModel.onRefresh()
     }
 
+    private fun setPackageNameForQuickAccess(packageName: String){
+        prefs.quickAccessAppName = packageName
+    }
 
     private fun onUninstall(packageName: String) {
         val intent = Intent(Intent.ACTION_DELETE)

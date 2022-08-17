@@ -8,24 +8,17 @@ import android.graphics.drawable.Drawable
 
 class AppAdapter constructor(
     val onSelect : (String) -> Unit,
-    val onUninstall: (String) -> Unit
+    val onUninstall: (String) -> Unit,
+    val onLongPress: (String) -> Unit
 ) : RecyclerView.Adapter<AppAdapter.AppViewHolder>(){
 
     private var list  = arrayListOf<AppDetails>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AppViewHolder {
-        return AppViewHolder(ItemAppBinding.inflate(LayoutInflater.from(parent.context),parent,false),
-                onSelect0 = {
-                    onSelect(it)
-                },
-            onUninstall = {
-                onUninstall(it)
-            }
-            )
+        return AppViewHolder(ItemAppBinding.inflate(LayoutInflater.from(parent.context),parent,false))
     }
 
     override fun onBindViewHolder(holder: AppViewHolder, position: Int) {
-
         holder.bind(list[position])
     }
 
@@ -38,10 +31,8 @@ class AppAdapter constructor(
         this.list.addAll(listApps)
     }
 
-    class AppViewHolder(
-        private val binding : ItemAppBinding,
-        val onSelect0: (String) -> Unit,
-        val onUninstall : (String) -> Unit
+    inner class AppViewHolder(
+        private val binding : ItemAppBinding
     ) : RecyclerView.ViewHolder(binding.root){
 
         fun bind(app : AppDetails){
@@ -49,11 +40,16 @@ class AppAdapter constructor(
             binding.imgView.setImageDrawable(app.image)
 
             binding.root.setOnClickListener {
-                onSelect0(app.packageName)
+                onSelect(app.packageName)
             }
 
             binding.btnUnInstall.setOnClickListener {
                 onUninstall(app.packageName)
+            }
+
+            binding.root.setOnLongClickListener {
+                onLongPress(app.packageName)
+                true
             }
         }
 
