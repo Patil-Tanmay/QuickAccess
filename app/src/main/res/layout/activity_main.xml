@@ -27,7 +27,7 @@
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
                 android:visibility="visible"
-                android:background="@color/purple_500">
+                android:background="@color/primaryColor">
 
                 <TextView
                     android:layout_width="wrap_content"

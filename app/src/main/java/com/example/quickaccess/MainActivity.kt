@@ -42,6 +42,7 @@ class MainActivity : AppCompatActivity() {
     private val result =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == RESULT_OK) {
+                viewModel.onRefresh()
                 Toast.makeText(this, "Cancelled", Toast.LENGTH_SHORT).show()
             }
         }
@@ -55,6 +56,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setTheme(R.style.Theme_Dark)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
