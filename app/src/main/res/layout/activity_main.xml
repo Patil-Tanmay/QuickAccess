@@ -26,26 +26,27 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
-                android:visibility="visible"
-                android:background="@color/primaryColor">
+                android:background="@color/primaryColor"
+                android:visibility="visible">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
-                    android:text="QuickAccess"
                     android:layout_marginStart="10dp"
+                    android:fontFamily="@font/google_sans_medium"
+                    android:text="QuickAccess"
                     android:textColor="@color/white"
-                    android:textSize="20sp"/>
+                    android:textSize="20sp" />
 
                 <ImageView
                     android:id="@+id/setTheme"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/ic_lightbulb_empty"
-                    android:layout_toStartOf="@+id/open_search_button"
                     android:layout_centerVertical="true"
-                    android:layout_marginEnd="15dp"/>
+                    android:layout_marginEnd="15dp"
+                    android:layout_toStartOf="@+id/open_search_button"
+                    android:src="@drawable/ic_lightbulb_empty" />
 
                 <ImageView
                     android:id="@+id/open_search_button"
@@ -82,11 +83,14 @@
                     android:layout_marginStart="8dp"
                     android:layout_marginEnd="16dp"
                     android:layout_toEndOf="@id/close_search_button"
-                    android:hint="Search..."
-                    android:textColorHint="@color/white"
+                    android:background="@drawable/bg_editext"
                     android:cursorVisible="true"
+                    android:fontFamily="@font/google_sans_medium"
+                    android:hint="Search..."
+                    android:textSize="18sp"
+                    tools:text="test app"
                     android:textColor="@color/white"
-                    android:background="@drawable/bg_editext" />
+                    android:textColorHint="@color/white" />
 
             </RelativeLayout>
 
