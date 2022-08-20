@@ -3,7 +3,7 @@
     <style name="Theme.QuickAccess" parent="Theme.MaterialComponents.Light.NoActionBar">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/primaryColor</item>
-        <item name="colorPrimaryVariant">@color/purple_700</item>
+        <item name="colorPrimaryVariant">@color/colorVariant</item>
         <item name="colorOnPrimary">@color/white</item>
 
 
@@ -23,7 +23,7 @@
     <style name="Theme.Dark" parent="ThemeOverlay.MaterialComponents.Dark">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/primaryColor</item>
-        <item name="colorPrimaryVariant">#41A0CD</item>
+        <item name="colorPrimaryVariant">@color/colorVariant</item>
         <item name="colorOnPrimary">@color/white</item>
         <!--       #A6E2FF -->
 
