@@ -28,10 +28,10 @@ fun Activity.hideKeyboard() {
     view.hideKeyboard()
 }
 
-fun Activity.showKeyBoard() {
-    val view = currentFocus ?: View(this)
-    view.showKeyBoard()
-}
+//fun Activity.showKeyBoard() {
+//    val view = currentFocus ?: View(this)
+//    view.showKeyBoard()
+//}
 
 
 

@@ -15,8 +15,8 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(val app: Application) : AndroidViewModel(app) {
 
-    private var _appList: MutableSharedFlow<Resource<List<AppDetails>>> = MutableSharedFlow()
-    val appListt get() = _appList.asSharedFlow()
+    private var _appList: MutableSharedFlow<Resource<List<AppDetails>>> = MutableSharedFlow(1)
+    val appListFlow: MutableSharedFlow<Resource<List<AppDetails>>> get() = _appList
 
     private var appList = arrayListOf<AppDetails>()
 
@@ -42,7 +42,6 @@ class MainViewModel @Inject constructor(val app: Application) : AndroidViewModel
                             isSystemPackage = isSystemPackage(applicationInfo)
                         )
                     }
-//            _refreshStatus.emit(false)
             if (currentQuery != null){
                 appList.clear()
                 appList.addAll(listOfApps)

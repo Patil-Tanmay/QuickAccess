@@ -39,6 +39,15 @@
                     android:textSize="20sp"/>
 
                 <ImageView
+                    android:id="@+id/setTheme"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_lightbulb_empty"
+                    android:layout_toStartOf="@+id/open_search_button"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="15dp"/>
+
+                <ImageView
                     android:id="@+id/open_search_button"
                     android:layout_width="24dp"
                     android:layout_height="24dp"

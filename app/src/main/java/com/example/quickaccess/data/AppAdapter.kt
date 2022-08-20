@@ -4,7 +4,6 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.quickaccess.databinding.ItemAppBinding
-import android.graphics.drawable.Drawable
 
 class AppAdapter constructor(
     val onSelect : (String) -> Unit,

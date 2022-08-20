@@ -29,34 +29,19 @@ import utils.showKeyBoard
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
-    private val TAG = "TAGG"
-
     private val viewModel by viewModels<MainViewModel>()
-
-    private val UN = 1
 
     private lateinit var binding: ActivityMainBinding
 
     private lateinit var adapter: AppAdapter
 
-    private val result =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            if (it.resultCode == RESULT_OK) {
-                viewModel.onRefresh()
-                Toast.makeText(this, "Cancelled", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-    private val unInstallApp =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            if (it.resultCode == RESULT_OK) {
-                Toast.makeText(this, "Successfully Uninstalled", Toast.LENGTH_SHORT).show()
-            }
-        }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setTheme(R.style.Theme_Dark)
+        if (!prefs.isDarkTheme) {
+            setTheme(R.style.Theme_QuickAccess)
+        } else {
+            setTheme(R.style.Theme_Dark)
+        }
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -66,6 +51,13 @@ class MainActivity : AppCompatActivity() {
             ::setPackageNameForQuickAccess
         )
         setupRecView(adapter)
+
+        initView()
+        if (prefs.isDarkTheme) {
+            binding.setTheme.setImageDrawable(this.getDrawable(R.drawable.ic_lightbulb_filed))
+        }else{
+            binding.setTheme.setImageDrawable(this.getDrawable(R.drawable.ic_lightbulb_empty))
+        }
 
         binding.openSearchButton.setOnClickListener {
             binding.searchInputText.requestFocus()
@@ -82,11 +74,21 @@ class MainActivity : AppCompatActivity() {
             viewModel.onRefresh()
         }
 
+        binding.setTheme.setOnClickListener {
+            if (!prefs.isDarkTheme) {
+                prefs.isDarkTheme = true
+                recreate()
+            } else {
+                prefs.isDarkTheme = false
+                recreate()
+            }
+        }
+
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
 
                 launch {
-                    viewModel.appListt.collect { resource ->
+                    viewModel.appListFlow.collect { resource ->
                         when (resource) {
                             is Resource.Loading -> {
                                 binding.pBar.visibility = View.VISIBLE
@@ -99,7 +101,6 @@ class MainActivity : AppCompatActivity() {
                                 binding.refreshLayout.isRefreshing = false
                                 binding.recView.visibility = View.VISIBLE
 
-//                                Log.d(TAG, "onCreate: ${it.size}")
                                 adapter.setAppData(resource.data!!)
                                 adapter.notifyDataSetChanged()
 
@@ -124,27 +125,27 @@ class MainActivity : AppCompatActivity() {
 
     }//end of onCreate
 
+    private fun initView(){
+
+    }
+
+    private fun setUpObservers(){
+
+    }
 
     //private functions
-
     private fun setupRecView(adapter: AppAdapter) {
         binding.recView.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         binding.recView.adapter = adapter
     }
 
+
     private fun onSelect(packageName: String) {
-        Log.d(TAG, "onSelect: $packageName")
+        Log.d(MainActivityTag, "onSelect: $packageName")
         val intent = packageManager.getLaunchIntentForPackage(packageName)
         intent?.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-//        startActivity(intent)
         result.launch(intent)
-    }
-
-
-    override fun onStart() {
-        super.onStart()
-//        viewModel.onRefresh()
     }
 
     private fun setPackageNameForQuickAccess(packageName: String){
@@ -202,17 +203,22 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    //useless code
-    //        val pm = packageManager
-////get a list of installed apps.
-////get a list of installed apps.
-//        val packages = pm.getInstalledApplications(PackageManager.GET_META_DATA)
-//
-//        for (packageInfo in packages) {
-//            Log.d(TAG, "Installed package :" + packageInfo.packageName)
-//            Log.d(TAG, "Source dir : " + packageInfo.sourceDir)
-//            Log.d(TAG, "Launch Activity :" + pm.getLaunchIntentForPackage(packageInfo.packageName))
-//        }
+    companion object {
+        private const val MainActivityTag: String = "TAGG"
+    }
 
+    private val result =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode == RESULT_OK) {
+                viewModel.onRefresh()
+                Toast.makeText(this, "Cancelled", Toast.LENGTH_SHORT).show()
+            }
+        }
 
+    private val unInstallApp =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode == RESULT_OK) {
+                Toast.makeText(this, "Successfully Uninstalled", Toast.LENGTH_SHORT).show()
+            }
+        }
 }
