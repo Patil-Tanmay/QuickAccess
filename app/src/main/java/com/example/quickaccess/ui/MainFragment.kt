@@ -1,49 +1,52 @@
-package com.example.quickaccess
+package com.example.quickaccess.ui
 
 import android.animation.Animator
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.ViewAnimationUtils
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.app.ActivityCompat.recreate
 import androidx.core.widget.addTextChangedListener
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.quickaccess.MainViewModel
+import com.example.quickaccess.R
 import com.example.quickaccess.data.AppAdapter
-import com.example.quickaccess.databinding.ActivityMainBinding
+import com.example.quickaccess.databinding.FragmentMainBinding
+import com.example.quickaccess.prefs
 import com.google.android.material.snackbar.Snackbar
-import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import utils.Resource
-import utils.hideKeyboard
-import utils.showKeyBoard
+import utils.*
 
+class MainFragment: Fragment(R.layout.fragment_main) {
 
-@AndroidEntryPoint
-class MainActivity : AppCompatActivity() {
-
-    private val viewModel by viewModels<MainViewModel>()
-
-    private lateinit var binding: ActivityMainBinding
+    private val binding by viewBinding (FragmentMainBinding::bind)
 
     private lateinit var adapter: AppAdapter
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        if (!prefs.isDarkTheme) {
-            setTheme(R.style.Theme_QuickAccess)
-        } else {
-            setTheme(R.style.Theme_Dark)
+    private val viewModel by viewModels<MainViewModel>()
+
+    interface OnThemeChangeCallBack{
+        fun onThemeChanged(isChanged: Boolean)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        if (prefs.isDarkTheme) {
+            requireContext().theme.applyStyle(R.style.Theme_Dark, true)
+        }else{
+            requireContext().theme.applyStyle(R.style.Theme_QuickAccess, true)
         }
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        view.startCircularReveal()
 
         adapter = AppAdapter(
             ::onSelect,
@@ -54,9 +57,9 @@ class MainActivity : AppCompatActivity() {
 
         initView()
         if (prefs.isDarkTheme) {
-            binding.setTheme.setImageDrawable(this.getDrawable(R.drawable.ic_lightbulb_filed))
+            binding.setTheme.setImageDrawable(AppCompatResources.getDrawable(requireContext(),R.drawable.ic_lightbulb_filed))
         }else{
-            binding.setTheme.setImageDrawable(this.getDrawable(R.drawable.ic_lightbulb_empty))
+            binding.setTheme.setImageDrawable(AppCompatResources.getDrawable(requireContext(),R.drawable.ic_lightbulb_empty))
         }
 
         binding.openSearchButton.setOnClickListener {
@@ -77,15 +80,17 @@ class MainActivity : AppCompatActivity() {
         binding.setTheme.setOnClickListener {
             if (!prefs.isDarkTheme) {
                 prefs.isDarkTheme = true
-                recreate()
+                (requireActivity() as OnThemeChangeCallBack).onThemeChanged(true)
+//                recreate(requireActivity())
             } else {
                 prefs.isDarkTheme = false
-                recreate()
+//                recreate(requireActivity())
+                (requireActivity() as OnThemeChangeCallBack).onThemeChanged(true)
             }
         }
 
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
 
                 launch {
                     viewModel.appListFlow.collect { resource ->
@@ -136,14 +141,13 @@ class MainActivity : AppCompatActivity() {
     //private functions
     private fun setupRecView(adapter: AppAdapter) {
         binding.recView.layoutManager =
-            LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+            LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
         binding.recView.adapter = adapter
     }
 
 
     private fun onSelect(packageName: String) {
-        Log.d(MainActivityTag, "onSelect: $packageName")
-        val intent = packageManager.getLaunchIntentForPackage(packageName)
+        val intent = requireActivity().packageManager.getLaunchIntentForPackage(packageName)
         intent?.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         result.launch(intent)
     }
@@ -203,22 +207,18 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    companion object {
-        private const val MainActivityTag: String = "TAGG"
-    }
-
     private val result =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            if (it.resultCode == RESULT_OK) {
+            if (it.resultCode == AppCompatActivity.RESULT_OK) {
                 viewModel.onRefresh()
-                Toast.makeText(this, "Cancelled", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Cancelled", Toast.LENGTH_SHORT).show()
             }
         }
 
     private val unInstallApp =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            if (it.resultCode == RESULT_OK) {
-                Toast.makeText(this, "Successfully Uninstalled", Toast.LENGTH_SHORT).show()
+            if (it.resultCode == AppCompatActivity.RESULT_OK) {
+                Toast.makeText(requireContext(), "Successfully Uninstalled", Toast.LENGTH_SHORT).show()
             }
         }
 }
