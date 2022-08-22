@@ -11,9 +11,9 @@
     <application
         android:name=".MainApplication"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher_rect"
+        android:icon="@mipmap/ic_logo_white_rect"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_new"
+        android:roundIcon="@mipmap/ic_logo_white_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.QuickAccess">
         <activity android:name=".MainActivity"
@@ -27,7 +27,7 @@
 
         <service
             android:name=".service.QuickAccessService"
-            android:icon="@drawable/ic_test"
+            android:icon="@drawable/ic_android_4"
             android:label="QuickAccess"
             android:exported="true"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">

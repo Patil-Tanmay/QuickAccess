@@ -14,11 +14,14 @@
         <entry key="..\:/StudioProjects/MainGithubProjects/QuickAccess/app/src/main/res/layout/view_search.xml" value="0.25416666666666665" />
         <entry key="..\:/StudioProjects/MainGithubProjects/QuickAccess/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.1" />
         <entry key="..\:/StudioProjects/MainGithubProjects/QuickAccess/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.1105" />
+        <entry key="app/src/main/res/drawable/ic_android_4.xml" value="0.177" />
         <entry key="app/src/main/res/drawable/ic_lightbulb_empty.xml" value="0.1005" />
         <entry key="app/src/main/res/drawable/ic_lightbulb_filed.xml" value="0.1005" />
+        <entry key="app/src/main/res/drawable/ic_test.xml" value="0.177" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.21666666666666667" />
         <entry key="app/src/main/res/layout/item_app.xml" value="0.22395833333333334" />
         <entry key="app/src/main/res/layout/view_search.xml" value="0.21666666666666667" />
+        <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.177" />
       </map>
     </option>
   </component>
