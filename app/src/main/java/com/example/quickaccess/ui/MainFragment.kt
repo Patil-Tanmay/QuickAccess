@@ -2,6 +2,8 @@ package com.example.quickaccess.ui
 
 import android.animation.Animator
 import android.content.Intent
+import android.content.res.ColorStateList
+import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
@@ -11,6 +13,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.app.ActivityCompat.recreate
+import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -27,15 +30,15 @@ import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 import utils.*
 
-class MainFragment: Fragment(R.layout.fragment_main) {
+class MainFragment : Fragment(R.layout.fragment_main) {
 
-    private val binding by viewBinding (FragmentMainBinding::bind)
+    private val binding by viewBinding(FragmentMainBinding::bind)
 
     private lateinit var adapter: AppAdapter
 
     private val viewModel by viewModels<MainViewModel>()
 
-    interface OnThemeChangeCallBack{
+    interface OnThemeChangeCallBack {
         fun onThemeChanged(isChanged: Boolean)
     }
 
@@ -43,8 +46,26 @@ class MainFragment: Fragment(R.layout.fragment_main) {
         super.onViewCreated(view, savedInstanceState)
         if (prefs.isDarkTheme) {
             requireContext().theme.applyStyle(R.style.Theme_Dark, true)
-        }else{
+
+            requireActivity().window.setBackgroundDrawable(
+                ColorDrawable(
+                    ContextCompat.getColor(
+                        requireContext(),
+                        R.color.backgroundColor
+                    )
+                )
+            )
+        } else {
             requireContext().theme.applyStyle(R.style.Theme_QuickAccess, true)
+
+            requireActivity().window.setBackgroundDrawable(
+                ColorDrawable(
+                    ContextCompat.getColor(
+                        requireContext(),
+                        R.color.white
+                    )
+                )
+            )
         }
         view.startCircularReveal()
 
@@ -57,9 +78,19 @@ class MainFragment: Fragment(R.layout.fragment_main) {
 
         initView()
         if (prefs.isDarkTheme) {
-            binding.setTheme.setImageDrawable(AppCompatResources.getDrawable(requireContext(),R.drawable.ic_lightbulb_filed))
-        }else{
-            binding.setTheme.setImageDrawable(AppCompatResources.getDrawable(requireContext(),R.drawable.ic_lightbulb_empty))
+            binding.setTheme.setImageDrawable(
+                AppCompatResources.getDrawable(
+                    requireContext(),
+                    R.drawable.ic_lightbulb_filed
+                )
+            )
+        } else {
+            binding.setTheme.setImageDrawable(
+                AppCompatResources.getDrawable(
+                    requireContext(),
+                    R.drawable.ic_lightbulb_empty
+                )
+            )
         }
 
         binding.openSearchButton.setOnClickListener {
@@ -130,11 +161,11 @@ class MainFragment: Fragment(R.layout.fragment_main) {
 
     }//end of onCreate
 
-    private fun initView(){
+    private fun initView() {
 
     }
 
-    private fun setUpObservers(){
+    private fun setUpObservers() {
 
     }
 
@@ -152,7 +183,7 @@ class MainFragment: Fragment(R.layout.fragment_main) {
         result.launch(intent)
     }
 
-    private fun setPackageNameForQuickAccess(packageName: String){
+    private fun setPackageNameForQuickAccess(packageName: String) {
         prefs.quickAccessAppName = packageName
     }
 
@@ -218,7 +249,8 @@ class MainFragment: Fragment(R.layout.fragment_main) {
     private val unInstallApp =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == AppCompatActivity.RESULT_OK) {
-                Toast.makeText(requireContext(), "Successfully Uninstalled", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Successfully Uninstalled", Toast.LENGTH_SHORT)
+                    .show()
             }
         }
 }
