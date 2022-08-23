@@ -25,10 +25,12 @@
         <item name="colorPrimary">@color/primaryColor</item>
         <item name="colorPrimaryVariant">@color/colorVariant</item>
         <item name="colorOnPrimary">@color/white</item>
-
         <!--       #A6E2FF -->
-
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
 
+    </style>
+
+    <style name="AppThemeFont">
+        <item name="fontFamily">@font/google_sans_medium</item>
     </style>
 </resources>

@@ -61,8 +61,8 @@ fun View.startCircularReveal() {
             val cy = v.top
             val radius = Math.hypot(v.width.toDouble(), v.height.toDouble()).toInt()
             ViewAnimationUtils.createCircularReveal(v, cx, cy, 0f, radius.toFloat()).apply {
-//                interpolator = DecelerateInterpolator(2f)
-                duration = 600
+//                interpolator = DecelerateInterpolator(0.5f)
+                duration = 800
                 start()
             }
         }

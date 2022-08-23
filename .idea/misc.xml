@@ -19,6 +19,7 @@
         <entry key="app/src/main/res/drawable/ic_lightbulb_filed.xml" value="0.1005" />
         <entry key="app/src/main/res/drawable/ic_test.xml" value="0.177" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.21666666666666667" />
+        <entry key="app/src/main/res/layout/dialog_quick_setting.xml" value="0.22291666666666668" />
         <entry key="app/src/main/res/layout/fragment_main.xml" value="0.23802083333333332" />
         <entry key="app/src/main/res/layout/item_app.xml" value="0.22395833333333334" />
         <entry key="app/src/main/res/layout/view_search.xml" value="0.21666666666666667" />

@@ -2,7 +2,6 @@ package com.example.quickaccess.ui
 
 import android.animation.Animator
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Bundle
@@ -10,9 +9,9 @@ import android.view.View
 import android.view.ViewAnimationUtils
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
-import androidx.core.app.ActivityCompat.recreate
 import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
@@ -24,8 +23,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.quickaccess.MainViewModel
 import com.example.quickaccess.R
 import com.example.quickaccess.data.AppAdapter
+import com.example.quickaccess.databinding.DialogQuickSettingBinding
 import com.example.quickaccess.databinding.FragmentMainBinding
 import com.example.quickaccess.prefs
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 import utils.*
@@ -184,7 +185,51 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     }
 
     private fun setPackageNameForQuickAccess(packageName: String) {
-        prefs.quickAccessAppName = packageName
+//        MaterialAlertDialogBuilder(requireContext())
+//            .setTitle(
+//                HtmlCompat.fromHtml(
+//                    "Set App For Quick Setting",
+//                    HtmlCompat.FROM_HTML_MODE_LEGACY
+//                )
+//            )
+//            .setMessage(
+//                HtmlCompat.fromHtml(
+//                    "<font color='#FFFFFF'>Once App is set for quick setting, you can access it through anywhere " +
+//                            "using quick tile service.</font>",
+//                    HtmlCompat.FROM_HTML_MODE_LEGACY
+//                )
+//            )
+//            .setPositiveButton(
+//                HtmlCompat.fromHtml(
+//                    "<font color='#FFFFFF'>Yes</font>",
+//                    HtmlCompat.FROM_HTML_MODE_LEGACY
+//                )
+//            ) { dialog, which ->
+//                prefs.quickAccessAppName = packageName
+//                Snackbar.make(binding.root, "Succesfully Set App For Quick Setting", Snackbar.LENGTH_SHORT).show()
+//            }
+//            .setNegativeButton(
+//                HtmlCompat.fromHtml(
+//                    "<font color='#FFFFFF'>No</font>",
+//                    HtmlCompat.FROM_HTML_MODE_LEGACY
+//                )
+//            ) { dialog, which ->
+//                dialog.dismiss()
+//            }.show()
+        val dialogQuickSettingBinding = DialogQuickSettingBinding.inflate(layoutInflater)
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogQuickSettingBinding.root)
+            .show()
+//        dialog.show()
+        dialogQuickSettingBinding.btnYes.setOnClickListener {
+            prefs.quickAccessAppName = packageName
+            Snackbar.make(binding.root, "Successfully Set App For Quick Setting", Snackbar.LENGTH_SHORT).show()
+            dialog.dismiss()
+        }
+
+        dialogQuickSettingBinding.btnNo.setOnClickListener {
+            dialog.dismiss()
+        }
     }
 
     private fun onUninstall(packageName: String) {
@@ -203,7 +248,6 @@ class MainFragment : Fragment(R.layout.fragment_main) {
                 viewModel.filterAppList("")
             }
         }
-
 
         binding.searchOpenView.visibility = View.VISIBLE
         val circularReveal = ViewAnimationUtils.createCircularReveal(

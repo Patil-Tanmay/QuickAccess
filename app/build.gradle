@@ -78,4 +78,7 @@ dependencies {
     //swipe refresh Layout
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
 
+    //GifImageView
+    implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.25'
+
 }
