@@ -1,6 +1,7 @@
 package com.example.quickaccess.ui
 
 import android.animation.Animator
+import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
@@ -43,8 +44,8 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         fun onThemeChanged(isChanged: Boolean)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
         if (prefs.isDarkTheme) {
             requireContext().theme.applyStyle(R.style.Theme_Dark, true)
 
@@ -68,6 +69,10 @@ class MainFragment : Fragment(R.layout.fragment_main) {
                 )
             )
         }
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         view.startCircularReveal()
 
         adapter = AppAdapter(
