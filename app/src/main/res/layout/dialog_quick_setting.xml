@@ -21,7 +21,7 @@
         android:layout_height="390dp"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="6dp"
-        android:src="@drawable/quick_setting_tutorial" />
+        android:src="@drawable/quick_setting_tutorialsmall" />
 
     <TextView
         android:id="@+id/ic_close"
