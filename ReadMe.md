@@ -5,7 +5,7 @@
 
 ***You can Install latest app from below***
 
-[![Quick Access App](https://img.shields.io/badge/QuickAccess-APK-blue.svg?style=for-the-badge&logo=android&color=blue)](https://github.com/patil-tanmay/Quotes/releases/download/v1.0/app-debug.apk)
+[![Quick Access App](https://img.shields.io/badge/QuickAccess-APK-blue.svg?style=for-the-badge&logo=android&color=blue)](https://github.com/Patil-Tanmay/QuickAccess/releases/download/v1.0/app-debug.apk)
 
 
 ## About
