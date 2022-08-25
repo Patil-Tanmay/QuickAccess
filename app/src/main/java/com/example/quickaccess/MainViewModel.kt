@@ -8,7 +8,7 @@ import com.example.quickaccess.data.AppDetails
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import utils.Resource
+import com.example.quickaccess.utils.Resource
 import javax.inject.Inject
 
 

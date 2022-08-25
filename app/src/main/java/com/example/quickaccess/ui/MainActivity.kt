@@ -27,10 +27,10 @@ import com.example.quickaccess.service.QuickAccessService
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import utils.Resource
-import utils.hideKeyboard
-import utils.open
-import utils.showKeyBoard
+import com.example.quickaccess.utils.Resource
+import com.example.quickaccess.utils.hideKeyboard
+import com.example.quickaccess.utils.open
+import com.example.quickaccess.utils.showKeyBoard
 
 
 @AndroidEntryPoint
@@ -48,6 +48,7 @@ class MainActivity : AppCompatActivity(), MainFragment.OnThemeChangeCallBack {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 //        if (!prefs.isDarkTheme) {

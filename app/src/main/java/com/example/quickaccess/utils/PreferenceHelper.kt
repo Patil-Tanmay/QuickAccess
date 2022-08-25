@@ -1,10 +1,10 @@
-package utils
+package com.example.quickaccess.utils
 
 import android.content.Context
 import android.content.SharedPreferences
-import utils.APPCONSTANTS.ISDARKTHEME
-import utils.APPCONSTANTS.PACKAGENAME
-import utils.APPCONSTANTS.SHARED_PREF
+import com.example.quickaccess.utils.APPCONSTANTS.ISDARKTHEME
+import com.example.quickaccess.utils.APPCONSTANTS.PACKAGENAME
+import com.example.quickaccess.utils.APPCONSTANTS.SHARED_PREF
 
 class PreferenceHelper(context : Context) {
 

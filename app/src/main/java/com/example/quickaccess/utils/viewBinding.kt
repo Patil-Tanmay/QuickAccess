@@ -1,4 +1,4 @@
-package utils
+package com.example.quickaccess.utils
 
 /**
  * Thanks to @author Gabor Varadi (u/Zhuinden)

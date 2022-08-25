@@ -5,7 +5,9 @@ import android.os.Build
 import android.service.quicksettings.TileService
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import utils.PreferenceHelper
+import androidx.core.content.ContextCompat
+import com.example.quickaccess.R
+import com.example.quickaccess.utils.PreferenceHelper
 
 @RequiresApi(Build.VERSION_CODES.N)
 class QuickAccessService : TileService() {
@@ -16,6 +18,10 @@ class QuickAccessService : TileService() {
         val intent = packageManager.getLaunchIntentForPackage(prefs.quickAccessAppName!!)
         intent?.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         startActivityAndCollapse(intent)
+    }
+
+    override fun onTileAdded() {
+        super.onTileAdded()
     }
 
 }

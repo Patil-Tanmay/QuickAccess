@@ -28,10 +28,10 @@ import com.example.quickaccess.databinding.BottomsheetQuickSettingBinding
 import com.example.quickaccess.databinding.DialogQuickSettingBinding
 import com.example.quickaccess.databinding.FragmentMainBinding
 import com.example.quickaccess.prefs
+import com.example.quickaccess.utils.*
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
-import utils.*
 
 class MainFragment : Fragment(R.layout.fragment_main) {
 

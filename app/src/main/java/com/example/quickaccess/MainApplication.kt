@@ -2,7 +2,7 @@ package com.example.quickaccess
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
-import utils.PreferenceHelper
+import com.example.quickaccess.utils.PreferenceHelper
 
 val prefs: PreferenceHelper by lazy {
     MainApplication.prefs!!
