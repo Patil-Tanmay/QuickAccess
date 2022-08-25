@@ -1,7 +1,6 @@
 package com.example.quickaccess.ui
 
 import android.animation.Animator
-import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
@@ -30,7 +29,6 @@ import com.example.quickaccess.databinding.DialogQuickSettingBinding
 import com.example.quickaccess.databinding.FragmentMainBinding
 import com.example.quickaccess.prefs
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 import utils.*
@@ -56,23 +54,13 @@ class MainFragment : Fragment(R.layout.fragment_main) {
             requireContext().theme.applyStyle(R.style.Theme_Dark, true)
 
             requireActivity().window.setBackgroundDrawable(
-                ColorDrawable(
-                    ContextCompat.getColor(
-                        requireContext(),
-                        R.color.backgroundColor
-                    )
-                )
+                ColorDrawable(ContextCompat.getColor(requireContext(), R.color.backgroundColor))
             )
         } else {
             requireContext().theme.applyStyle(R.style.Theme_QuickAccess, true)
 
             requireActivity().window.setBackgroundDrawable(
-                ColorDrawable(
-                    ContextCompat.getColor(
-                        requireContext(),
-                        R.color.white
-                    )
-                )
+                ColorDrawable(ContextCompat.getColor(requireContext(), R.color.white))
             )
         }
     }
@@ -80,37 +68,22 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         view.startCircularReveal()
-
-        dialogQuickSettingBinding = DialogQuickSettingBinding.inflate(layoutInflater)
-        dialog = AlertDialog.Builder(requireContext())
-            .setView(dialogQuickSettingBinding.root)
-            .create()
-
-        dialogQuickSettingBinding.icClose.setOnClickListener {
-            dialog.dismiss()
-        }
-
-        adapter = AppAdapter(
-            ::onSelect,
-            ::onUninstall,
-            ::setPackageNameForQuickAccess
-        )
+        initQuickSettingDialog()
+        adapter = AppAdapter(::onSelect, ::onUninstall, ::setPackageNameForQuickAccess)
         setupRecView(adapter)
-
         initView()
+        setUpObservers()
+
+    }//end of onCreate
+
+    private fun initView() {
         if (prefs.isDarkTheme) {
             binding.setTheme.setImageDrawable(
-                AppCompatResources.getDrawable(
-                    requireContext(),
-                    R.drawable.ic_lightbulb_filed
-                )
+                AppCompatResources.getDrawable(requireContext(), R.drawable.ic_lightbulb_filed)
             )
         } else {
             binding.setTheme.setImageDrawable(
-                AppCompatResources.getDrawable(
-                    requireContext(),
-                    R.drawable.ic_lightbulb_empty
-                )
+                AppCompatResources.getDrawable(requireContext(), R.drawable.ic_lightbulb_empty)
             )
         }
 
@@ -140,7 +113,20 @@ class MainFragment : Fragment(R.layout.fragment_main) {
                 (requireActivity() as OnThemeChangeCallBack).onThemeChanged(true)
             }
         }
+    }
 
+    private fun initQuickSettingDialog() {
+        dialogQuickSettingBinding = DialogQuickSettingBinding.inflate(layoutInflater)
+        dialog = AlertDialog.Builder(requireContext())
+            .setView(dialogQuickSettingBinding.root)
+            .create()
+
+        dialogQuickSettingBinding.icClose.setOnClickListener {
+            dialog.dismiss()
+        }
+    }
+
+    private fun setUpObservers() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
 
@@ -167,11 +153,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
                                 binding.refreshLayout.isRefreshing = false
                                 binding.recView.visibility = View.VISIBLE
 
-                                Snackbar.make(
-                                    binding.root,
-                                    "Error! Please relaunch the app.",
-                                    Snackbar.LENGTH_SHORT
-                                ).show()
+                                Snackbar.make(binding.root, "Error! Please relaunch the app.", Snackbar.LENGTH_SHORT).show()
                             }
                         }
 
@@ -179,15 +161,6 @@ class MainFragment : Fragment(R.layout.fragment_main) {
                 }
             }
         }
-
-    }//end of onCreate
-
-    private fun initView() {
-
-    }
-
-    private fun setUpObservers() {
-
     }
 
     //private functions
