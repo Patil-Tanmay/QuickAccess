@@ -24,9 +24,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.quickaccess.MainViewModel
 import com.example.quickaccess.R
 import com.example.quickaccess.data.AppAdapter
+import com.example.quickaccess.data.AppDetails
+import com.example.quickaccess.databinding.BottomsheetQuickSettingBinding
 import com.example.quickaccess.databinding.DialogQuickSettingBinding
 import com.example.quickaccess.databinding.FragmentMainBinding
 import com.example.quickaccess.prefs
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
@@ -40,12 +43,15 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 
     private val viewModel by viewModels<MainViewModel>()
 
+    private lateinit var dialogQuickSettingBinding: DialogQuickSettingBinding
+    private lateinit var dialog: AlertDialog
+
     interface OnThemeChangeCallBack {
         fun onThemeChanged(isChanged: Boolean)
     }
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         if (prefs.isDarkTheme) {
             requireContext().theme.applyStyle(R.style.Theme_Dark, true)
 
@@ -74,6 +80,15 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         view.startCircularReveal()
+
+        dialogQuickSettingBinding = DialogQuickSettingBinding.inflate(layoutInflater)
+        dialog = AlertDialog.Builder(requireContext())
+            .setView(dialogQuickSettingBinding.root)
+            .create()
+
+        dialogQuickSettingBinding.icClose.setOnClickListener {
+            dialog.dismiss()
+        }
 
         adapter = AppAdapter(
             ::onSelect,
@@ -189,51 +204,46 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         result.launch(intent)
     }
 
-    private fun setPackageNameForQuickAccess(packageName: String) {
-//        MaterialAlertDialogBuilder(requireContext())
-//            .setTitle(
-//                HtmlCompat.fromHtml(
-//                    "Set App For Quick Setting",
-//                    HtmlCompat.FROM_HTML_MODE_LEGACY
-//                )
-//            )
-//            .setMessage(
-//                HtmlCompat.fromHtml(
-//                    "<font color='#FFFFFF'>Once App is set for quick setting, you can access it through anywhere " +
-//                            "using quick tile service.</font>",
-//                    HtmlCompat.FROM_HTML_MODE_LEGACY
-//                )
-//            )
-//            .setPositiveButton(
-//                HtmlCompat.fromHtml(
-//                    "<font color='#FFFFFF'>Yes</font>",
-//                    HtmlCompat.FROM_HTML_MODE_LEGACY
-//                )
-//            ) { dialog, which ->
-//                prefs.quickAccessAppName = packageName
-//                Snackbar.make(binding.root, "Succesfully Set App For Quick Setting", Snackbar.LENGTH_SHORT).show()
-//            }
-//            .setNegativeButton(
-//                HtmlCompat.fromHtml(
-//                    "<font color='#FFFFFF'>No</font>",
-//                    HtmlCompat.FROM_HTML_MODE_LEGACY
-//                )
-//            ) { dialog, which ->
-//                dialog.dismiss()
-//            }.show()
-        val dialogQuickSettingBinding = DialogQuickSettingBinding.inflate(layoutInflater)
-        val dialog = MaterialAlertDialogBuilder(requireContext())
-            .setView(dialogQuickSettingBinding.root)
-            .show()
-//        dialog.show()
-        dialogQuickSettingBinding.btnYes.setOnClickListener {
-            prefs.quickAccessAppName = packageName
-            Snackbar.make(binding.root, "Successfully Set App For Quick Setting", Snackbar.LENGTH_SHORT).show()
-            dialog.dismiss()
-        }
+    private fun setPackageNameForQuickAccess(app: AppDetails) {
+        val bottomsheetBinding = BottomsheetQuickSettingBinding.inflate(layoutInflater)
+        val bottomsheet = BottomSheetDialog(requireContext())
+        bottomsheet.setContentView(bottomsheetBinding.root)
+        bottomsheet.show()
 
-        dialogQuickSettingBinding.btnNo.setOnClickListener {
-            dialog.dismiss()
+        bottomsheetBinding.apply {
+            titleText.text = app.name
+            subQuickAccessText.alpha = 0.6f
+            subDemoText.alpha = 0.6f
+
+            appLogo.setImageDrawable(app.image)
+
+            if (prefs.isDarkTheme) {
+                logo.setImageResource(R.drawable.ic_android_4)
+                demoImage.setImageResource(R.drawable.ic_demo_white)
+                icClose.setImageResource(R.drawable.ic_close_white)
+            } else {
+                logo.setImageResource(R.drawable.ic_android_4)
+                demoImage.setImageResource(R.drawable.ic_demo_dark)
+                icClose.setImageResource(R.drawable.ic_close_dark)
+            }
+
+            icClose.setOnClickListener {
+                bottomsheet.dismiss()
+            }
+
+            quickAccessLayout.setOnClickListener {
+                prefs.quickAccessAppName = app.packageName
+                Snackbar.make(
+                    binding.root,
+                    "Successfully Set App For Quick Setting",
+                    Snackbar.LENGTH_SHORT
+                ).show()
+                bottomsheet.dismiss()
+            }
+
+            demo.setOnClickListener {
+                dialog.show()
+            }
         }
     }
 
@@ -290,7 +300,6 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     private val result =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == AppCompatActivity.RESULT_OK) {
-                viewModel.onRefresh()
                 Toast.makeText(requireContext(), "Cancelled", Toast.LENGTH_SHORT).show()
             }
         }
@@ -298,6 +307,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     private val unInstallApp =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == AppCompatActivity.RESULT_OK) {
+                viewModel.onRefresh()
                 Toast.makeText(requireContext(), "Successfully Uninstalled", Toast.LENGTH_SHORT)
                     .show()
             }

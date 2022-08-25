@@ -17,12 +17,22 @@
             android:layout_marginTop="15dp"
             android:weightSum="2"
             android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/appLogo"
+                android:layout_width="50dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center_vertical"
+                android:paddingBottom="2dp"
+                tools:src = "@drawable/ic_arrow_back"/>
             <TextView
                 android:id="@+id/title_text"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="5dp"
                 android:layout_weight="2"
+                android:layout_gravity="center_vertical"
+                android:gravity="center_vertical"
                 tools:text="App Name"
                 android:textSize="25sp" />
 
@@ -30,8 +40,9 @@
             <ImageView
                 android:id="@+id/ic_close"
                 android:layout_width="35dp"
-                android:layout_height="35dp"
+                android:layout_height="match_parent"
                 android:layout_marginEnd="25dp"
+                android:layout_gravity="center_vertical"
                 android:layout_weight="1"
                 tools:src="@drawable/ic_close_dark" />
 
@@ -50,22 +61,25 @@
             android:id="@+id/quickAccessLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
             android:clickable="true"
             android:focusable="true"
             android:orientation="horizontal">
 
             <ImageView
+                android:id="@+id/logo"
                 android:layout_width="70dp"
                 android:layout_height="40dp"
                 android:layout_gravity="center_vertical"
                 android:layout_marginEnd="10dp"
                 android:layout_weight="0.5"
-                android:src="@drawable/ic_image" />
+                android:src="@drawable/ic_android_4" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:orientation="vertical"
                 android:layout_weight="2"
+                android:layout_marginEnd="12dp"
                 android:layout_height="wrap_content">
 
             <TextView
@@ -77,6 +91,7 @@
                 android:textSize="18sp" />
 
             <TextView
+                android:id="@+id/subQuickAccessText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Once App is set for quick access, you can access it from quick setting."
@@ -85,16 +100,10 @@
 
             </LinearLayout>
 
-            <ImageView
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_weight="0.5"
-                android:src="@drawable/ic_arrow_back" />
-
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/text_layout"
+            android:id="@+id/demo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
@@ -104,26 +113,39 @@
             android:orientation="horizontal">
 
             <ImageView
+                android:id="@+id/demo_image"
                 android:layout_width="70dp"
                 android:layout_height="40dp"
                 android:layout_gravity="center_vertical"
                 android:layout_marginEnd="10dp"
                 android:layout_weight="0.5"
-                android:src="@drawable/ic_content_copy" />
+                android:src="@drawable/ic_demo_dark" />
 
-            <TextView
+            <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
+                android:orientation="vertical"
                 android:layout_weight="2"
-                android:text="Text"
-                android:textSize="25sp" />
+                android:layout_marginEnd="12dp"
+                android:layout_height="wrap_content">
 
-            <ImageView
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_weight="0.5"
-                android:src="@drawable/ic_arrow_right" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:text="Demo"
+                    android:textStyle="bold"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/subDemoText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="This shows how you can use QuickAccess Feature in your device."
+                    android:alpha="0.8"/>
+
+
+            </LinearLayout>
+
 
         </LinearLayout>
 

@@ -8,7 +8,7 @@ import com.example.quickaccess.databinding.ItemAppBinding
 class AppAdapter constructor(
     val onSelect : (String) -> Unit,
     val onUninstall: (String) -> Unit,
-    val onLongPress: (String) -> Unit
+    val onLongPress: (AppDetails) -> Unit
 ) : RecyclerView.Adapter<AppAdapter.AppViewHolder>(){
 
     private var list  = arrayListOf<AppDetails>()
@@ -47,7 +47,7 @@ class AppAdapter constructor(
             }
 
             binding.root.setOnLongClickListener {
-                onLongPress(app.packageName)
+                onLongPress(app)
                 true
             }
         }
