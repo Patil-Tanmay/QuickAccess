@@ -3,16 +3,22 @@ package com.example.quickaccess.ui
 import android.animation.Animator
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Icon
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
+import android.util.Log.INFO
 import android.view.View
 import android.view.ViewAnimationUtils
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -28,10 +34,12 @@ import com.example.quickaccess.databinding.BottomsheetQuickSettingBinding
 import com.example.quickaccess.databinding.DialogQuickSettingBinding
 import com.example.quickaccess.databinding.FragmentMainBinding
 import com.example.quickaccess.prefs
+import com.example.quickaccess.service.QuickAccessService
 import com.example.quickaccess.utils.*
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
+import java.util.logging.Level.INFO
 
 class MainFragment : Fragment(R.layout.fragment_main) {
 
@@ -65,6 +73,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         view.startCircularReveal()
@@ -144,6 +153,10 @@ class MainFragment : Fragment(R.layout.fragment_main) {
                                 binding.refreshLayout.isRefreshing = false
                                 binding.recView.visibility = View.VISIBLE
 
+//                                Log.e("SubList", "chucked: ${resource.data?.chunked(5)}")
+                                Log.i("SubList", "windowed: ${resource.data?.windowed(5,3,partialWindows = true)
+                                    ?.get(2)?.size}")
+
                                 adapter.setAppData(resource.data!!)
                                 adapter.notifyDataSetChanged()
 
@@ -177,6 +190,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         result.launch(intent)
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     private fun setPackageNameForQuickAccess(app: AppDetails) {
         val bottomsheetBinding = BottomsheetQuickSettingBinding.inflate(layoutInflater)
         val bottomsheet = BottomSheetDialog(requireContext())
@@ -205,6 +219,8 @@ class MainFragment : Fragment(R.layout.fragment_main) {
             }
 
             quickAccessLayout.setOnClickListener {
+                QuickAccessService().qsTile.icon = Icon.createWithResource(requireContext(),R.drawable.ic_arrow_back)
+                QuickAccessService().qsTile.updateTile()
                 prefs.quickAccessAppName = app.packageName
                 Snackbar.make(
                     binding.root,

@@ -20,6 +20,10 @@ class QuickAccessService : TileService() {
         startActivityAndCollapse(intent)
     }
 
+    override fun onStartListening() {
+        super.onStartListening()
+    }
+
     override fun onTileAdded() {
         super.onTileAdded()
     }
