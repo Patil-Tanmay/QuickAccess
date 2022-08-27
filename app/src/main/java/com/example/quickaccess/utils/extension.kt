@@ -172,6 +172,11 @@ internal fun View.doOnLaidOut(block: (View) -> Unit) {
     }
 }
 
+enum class UiState{
+    Loading,
+    Success,
+    Error
+}
 
 //fun Activity.showKeyBoard() {
 //    val view = currentFocus ?: View(this)

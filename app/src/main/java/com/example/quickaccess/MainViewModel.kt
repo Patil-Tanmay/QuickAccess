@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import androidx.lifecycle.*
+import com.example.quickaccess.MainApplication.Companion.listOfAppsPaged
 import com.example.quickaccess.data.AppDetails
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -29,27 +30,27 @@ class MainViewModel @Inject constructor(val app: Application) : AndroidViewModel
     private fun getList(packageManager: PackageManager) {
         viewModelScope.launch {
             _appList.emit(Resource.Loading)
-            val listOfApps =
-                packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
-                    .filter {
-                        packageManager.getLaunchIntentForPackage(it.packageName) != null
-                    }.map { applicationInfo ->
-                        AppDetails(
-                            packageName = applicationInfo.packageName,
-                            name = packageManager.getApplicationLabel(applicationInfo)
-                                .toString(),
-                            image = applicationInfo.loadIcon(packageManager),
-                            isSystemPackage = isSystemPackage(applicationInfo)
-                        )
-                    }
+//            val listOfApps =
+//                packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
+//                    .filter {
+//                        packageManager.getLaunchIntentForPackage(it.packageName) != null
+//                    }.map { applicationInfo ->
+//                        AppDetails(
+//                            packageName = applicationInfo.packageName,
+//                            name = packageManager.getApplicationLabel(applicationInfo)
+//                                .toString(),
+//                            image = applicationInfo.loadIcon(packageManager),
+//                            isSystemPackage = isSystemPackage(applicationInfo)
+//                        )
+//                    }
             if (currentQuery != null){
                 appList.clear()
-                appList.addAll(listOfApps)
+                appList.addAll(MainApplication.listOfApps)
                 filterAppList(currentQuery!!)
             }else {
                 appList.clear()
-                appList.addAll(listOfApps)
-                _appList.emit(Resource.Success(listOfApps))
+                appList.addAll(MainApplication.listOfApps)
+                _appList.emit(Resource.Success(MainApplication.listOfApps))
             }
         }
     }

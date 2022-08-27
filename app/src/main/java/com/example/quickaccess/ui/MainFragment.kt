@@ -2,13 +2,15 @@ package com.example.quickaccess.ui
 
 import android.animation.Animator
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Icon
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.util.Base64
 import android.util.Log
-import android.util.Log.INFO
 import android.view.View
 import android.view.ViewAnimationUtils
 import android.widget.Toast
@@ -39,7 +41,8 @@ import com.example.quickaccess.utils.*
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
-import java.util.logging.Level.INFO
+import java.io.ByteArrayOutputStream
+
 
 class MainFragment : Fragment(R.layout.fragment_main) {
 
@@ -154,8 +157,8 @@ class MainFragment : Fragment(R.layout.fragment_main) {
                                 binding.recView.visibility = View.VISIBLE
 
 //                                Log.e("SubList", "chucked: ${resource.data?.chunked(5)}")
-                                Log.i("SubList", "windowed: ${resource.data?.windowed(5,3,partialWindows = true)
-                                    ?.get(2)?.size}")
+                                Log.i("SubList", "windowed: ${resource.data?.windowed(18,3,partialWindows = true)
+                                    ?.get(0)?.size}")
 
                                 adapter.setAppData(resource.data!!)
                                 adapter.notifyDataSetChanged()
@@ -174,6 +177,17 @@ class MainFragment : Fragment(R.layout.fragment_main) {
                 }
             }
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.R)
+    private fun encodeImageDrawable(realImage: Bitmap){
+        val baos = ByteArrayOutputStream()
+        realImage.compress(Bitmap.CompressFormat.WEBP, 100, baos)
+        val b: ByteArray = baos.toByteArray()
+
+        val encodedImage: String = Base64.encodeToString(b, Base64.DEFAULT)
+
+        prefs.imageDrawable = encodedImage
     }
 
     //private functions
@@ -219,14 +233,9 @@ class MainFragment : Fragment(R.layout.fragment_main) {
             }
 
             quickAccessLayout.setOnClickListener {
-                QuickAccessService().qsTile.icon = Icon.createWithResource(requireContext(),R.drawable.ic_arrow_back)
-                QuickAccessService().qsTile.updateTile()
+                encodeImageDrawable(app.image.toBitmap())
                 prefs.quickAccessAppName = app.packageName
-                Snackbar.make(
-                    binding.root,
-                    "Successfully Set App For Quick Setting",
-                    Snackbar.LENGTH_SHORT
-                ).show()
+                Snackbar.make(binding.root, "Successfully Set App For Quick Setting", Snackbar.LENGTH_SHORT).show()
                 bottomsheet.dismiss()
             }
 
