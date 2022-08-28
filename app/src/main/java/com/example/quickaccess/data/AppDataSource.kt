@@ -1,6 +1,7 @@
 package com.example.quickaccess.data
 
 import androidx.paging.PageKeyedDataSource
+import com.example.quickaccess.MainApplication
 import com.example.quickaccess.MainApplication.Companion.listOfAppsPaged
 import com.example.quickaccess.MainApplication.Companion.pages
 import com.example.quickaccess.utils.UiState
@@ -24,16 +25,16 @@ class AppDataSource(
         }
     }
 
-    override fun loadBefore(params: LoadParams<Int>, callback: LoadCallback<Int, AppDetails>) {
+    override fun loadAfter(params: LoadParams<Int>, callback: LoadCallback<Int, AppDetails>) {
         scope.launch {
-            if (params.key <= pages){
+            if (params.key < pages){
                 val nextPageKey = params.key + 1
                 callback.onResult(listOfAppsPaged[params.key],nextPageKey)
             }
         }
     }
 
-    override fun loadAfter(params: LoadParams<Int>, callback: LoadCallback<Int, AppDetails>) {
-        TODO("Not yet implemented")
+    override fun loadBefore(params: LoadParams<Int>, callback: LoadCallback<Int, AppDetails>) {
+        // TODO: No need
     }
 }

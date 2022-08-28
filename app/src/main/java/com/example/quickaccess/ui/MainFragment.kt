@@ -32,11 +32,13 @@ import com.example.quickaccess.MainViewModel
 import com.example.quickaccess.R
 import com.example.quickaccess.data.AppAdapter
 import com.example.quickaccess.data.AppDetails
+import com.example.quickaccess.data.AppListing
 import com.example.quickaccess.databinding.BottomsheetQuickSettingBinding
 import com.example.quickaccess.databinding.DialogQuickSettingBinding
 import com.example.quickaccess.databinding.FragmentMainBinding
 import com.example.quickaccess.prefs
 import com.example.quickaccess.service.QuickAccessService
+import com.example.quickaccess.service.QuickAccessService.Companion.isTileAdded
 import com.example.quickaccess.utils.*
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.snackbar.Snackbar
@@ -55,6 +57,8 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     private lateinit var dialogQuickSettingBinding: DialogQuickSettingBinding
     private lateinit var dialog: AlertDialog
 
+    private lateinit var appListing: AppListing
+
     interface OnThemeChangeCallBack {
         fun onThemeChanged(isChanged: Boolean)
     }
@@ -63,13 +67,11 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         super.onCreate(savedInstanceState)
         if (prefs.isDarkTheme) {
             requireContext().theme.applyStyle(R.style.Theme_Dark, true)
-
             requireActivity().window.setBackgroundDrawable(
                 ColorDrawable(ContextCompat.getColor(requireContext(), R.color.backgroundColor))
             )
         } else {
             requireContext().theme.applyStyle(R.style.Theme_QuickAccess, true)
-
             requireActivity().window.setBackgroundDrawable(
                 ColorDrawable(ContextCompat.getColor(requireContext(), R.color.white))
             )
@@ -80,6 +82,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         view.startCircularReveal()
+        appListing = viewModel.getPagedAppList()
         initQuickSettingDialog()
         adapter = AppAdapter(::onSelect, ::onUninstall, ::setPackageNameForQuickAccess)
         setupRecView(adapter)
@@ -118,10 +121,8 @@ class MainFragment : Fragment(R.layout.fragment_main) {
             if (!prefs.isDarkTheme) {
                 prefs.isDarkTheme = true
                 (requireActivity() as OnThemeChangeCallBack).onThemeChanged(true)
-//                recreate(requireActivity())
             } else {
                 prefs.isDarkTheme = false
-//                recreate(requireActivity())
                 (requireActivity() as OnThemeChangeCallBack).onThemeChanged(true)
             }
         }
@@ -139,47 +140,50 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     }
 
     private fun setUpObservers() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+//        viewLifecycleOwner.lifecycleScope.launch {
+//            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+//
+//                launch {
+//                    viewModel.appListFlow.collect { resource ->
+//                        when (resource) {
+//                            is Resource.Loading -> {
+//                                binding.pBar.visibility = View.VISIBLE
+//                                binding.refreshLayout.isRefreshing = true
+//                                binding.recView.visibility = View.GONE
+//                            }
+//
+//                            is Resource.Success -> {
+//                                binding.pBar.visibility = View.GONE
+//                                binding.refreshLayout.isRefreshing = false
+//                                binding.recView.visibility = View.VISIBLE
+//
+////                                Log.e("SubList", "chucked: ${resource.data?.chunked(5)}")
+//                                Log.i("SubList", "windowed: ${resource.data?.windowed(18,3,partialWindows = true)
+//                                    ?.get(0)?.size}")
+//
+//                                adapter.setAppData(resource.data!!)
+//                                adapter.notifyDataSetChanged()
+//
+//                            }
+//                            is Resource.Error -> {
+//                                binding.pBar.visibility = View.GONE
+//                                binding.refreshLayout.isRefreshing = false
+//                                binding.recView.visibility = View.VISIBLE
+//
+//                                Snackbar.make(binding.root, "Error! Please relaunch the app.", Snackbar.LENGTH_SHORT).show()
+//                            }
+//                        }
+//
+//                    }
+//                }
+//            }
+//        }
 
-                launch {
-                    viewModel.appListFlow.collect { resource ->
-                        when (resource) {
-                            is Resource.Loading -> {
-                                binding.pBar.visibility = View.VISIBLE
-                                binding.refreshLayout.isRefreshing = true
-                                binding.recView.visibility = View.GONE
-                            }
-
-                            is Resource.Success -> {
-                                binding.pBar.visibility = View.GONE
-                                binding.refreshLayout.isRefreshing = false
-                                binding.recView.visibility = View.VISIBLE
-
-//                                Log.e("SubList", "chucked: ${resource.data?.chunked(5)}")
-                                Log.i("SubList", "windowed: ${resource.data?.windowed(18,3,partialWindows = true)
-                                    ?.get(0)?.size}")
-
-                                adapter.setAppData(resource.data!!)
-                                adapter.notifyDataSetChanged()
-
-                            }
-                            is Resource.Error -> {
-                                binding.pBar.visibility = View.GONE
-                                binding.refreshLayout.isRefreshing = false
-                                binding.recView.visibility = View.VISIBLE
-
-                                Snackbar.make(binding.root, "Error! Please relaunch the app.", Snackbar.LENGTH_SHORT).show()
-                            }
-                        }
-
-                    }
-                }
-            }
+        appListing.appList.observe(viewLifecycleOwner){
+            adapter.submitList(it)
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.R)
     private fun encodeImageDrawable(realImage: Bitmap){
         val baos = ByteArrayOutputStream()
         realImage.compress(Bitmap.CompressFormat.WEBP, 100, baos)
@@ -233,9 +237,12 @@ class MainFragment : Fragment(R.layout.fragment_main) {
             }
 
             quickAccessLayout.setOnClickListener {
-                encodeImageDrawable(app.image.toBitmap())
                 prefs.quickAccessAppName = app.packageName
-                Snackbar.make(binding.root, "Successfully Set App For Quick Setting", Snackbar.LENGTH_SHORT).show()
+                if (!isTileAdded){
+                    Snackbar.make(binding.root, "Please add App to the Quick Tile to access this feature.", Snackbar.LENGTH_LONG).show()
+                }else {
+                    Snackbar.make(binding.root, "Successfully Set App For Quick Setting", Snackbar.LENGTH_SHORT).show()
+                }
                 bottomsheet.dismiss()
             }
 

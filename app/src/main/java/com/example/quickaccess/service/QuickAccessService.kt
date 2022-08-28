@@ -1,10 +1,9 @@
 package com.example.quickaccess.service
 
 import android.content.Intent
-import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.drawable.Icon
 import android.os.Build
 import android.service.quicksettings.TileService
 import android.util.Base64
@@ -15,24 +14,63 @@ import com.example.quickaccess.utils.PreferenceHelper
 @RequiresApi(Build.VERSION_CODES.N)
 class QuickAccessService : TileService() {
 
+    companion object {
+        @JvmStatic var isTileAdded: Boolean = false
+    }
+
     private lateinit var prefs: PreferenceHelper
+
+    private lateinit var quickAccessPackageName: String
 
     override fun onClick() {
         super.onClick()
-        val intent = packageManager.getLaunchIntentForPackage(prefs.quickAccessAppName!!)
+        val intent = packageManager.getLaunchIntentForPackage(quickAccessPackageName)
         intent?.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         startActivityAndCollapse(intent)
     }
 
     override fun onStartListening() {
         prefs = PreferenceHelper(baseContext)
+       val listOfApps =
+            packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
+                .filter {
+                    packageManager.getLaunchIntentForPackage(it.packageName) != null
+                }.map { applicationInfo ->
+                    AppName(
+                        packageManager.getApplicationLabel(applicationInfo).toString(),
+                        applicationInfo.packageName
+                    )
+                }
+        qsTile.state
+        if (listOfApps.map { it.packageName }.contains(prefs.quickAccessAppName)) {
+            val imageInfo = listOfApps.map { it.packageName }.indexOf(prefs.quickAccessAppName)
+            qsTile.label = listOfApps[imageInfo].name
+            quickAccessPackageName = listOfApps[imageInfo].packageName
+            qsTile.updateTile()
+        }else{
+            qsTile.label = applicationInfo.name
+            quickAccessPackageName = applicationInfo.packageName
+            qsTile.updateTile()
+        }
         super.onStartListening()
-        qsTile.icon = Icon.createWithBitmap(decodeToBitmap())
-        qsTile.updateTile()
     }
 
     override fun onTileAdded() {
+        isTileAdded = true
         super.onTileAdded()
+    }
+
+    override fun onTileRemoved() {
+        isTileAdded = false
+        super.onTileRemoved()
+    }
+
+    override fun onStopListening() {
+        super.onStopListening()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
     }
 
     private fun decodeToBitmap(): Bitmap {
@@ -42,4 +80,8 @@ class QuickAccessService : TileService() {
         return bitmap
     }
 
+    data class AppName(
+        val name : String,
+        val packageName : String
+    )
 }

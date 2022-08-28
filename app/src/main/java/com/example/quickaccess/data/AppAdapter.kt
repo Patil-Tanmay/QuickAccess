@@ -2,6 +2,8 @@ package com.example.quickaccess.data
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.paging.PagedListAdapter
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.quickaccess.databinding.ItemAppBinding
 
@@ -9,7 +11,7 @@ class AppAdapter constructor(
     val onSelect : (String) -> Unit,
     val onUninstall: (String) -> Unit,
     val onLongPress: (AppDetails) -> Unit
-) : RecyclerView.Adapter<AppAdapter.AppViewHolder>(){
+) : PagedListAdapter<AppDetails,AppAdapter.AppViewHolder>(APP_COMPARATOR){
 
     private var list  = arrayListOf<AppDetails>()
 
@@ -18,11 +20,12 @@ class AppAdapter constructor(
     }
 
     override fun onBindViewHolder(holder: AppViewHolder, position: Int) {
-        holder.bind(list[position])
-    }
+//        holder.bind(list[position])
+        val currentItem = getItem(position)
 
-    override fun getItemCount(): Int {
-        return list.size
+        if (currentItem != null) {
+            holder.bind(currentItem)
+        }
     }
 
     fun setAppData(listApps : List<AppDetails>){
@@ -52,6 +55,19 @@ class AppAdapter constructor(
             }
         }
 
+    }
+
+    //to compare the data using diffUtil
+    companion object {
+        private val APP_COMPARATOR = object : DiffUtil.ItemCallback<AppDetails>() {
+            override fun areItemsTheSame(oldItem: AppDetails, newItem: AppDetails): Boolean {
+                return oldItem.name == newItem.name
+            }
+
+            override fun areContentsTheSame(oldItem: AppDetails, newItem: AppDetails): Boolean {
+                return oldItem == newItem
+            }
+        }
     }
 
     

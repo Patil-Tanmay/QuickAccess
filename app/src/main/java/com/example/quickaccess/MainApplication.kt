@@ -51,6 +51,10 @@ class MainApplication : Application() {
 
     }
 
+    fun refreshAppList(){
+        listOfAppsPaged = listOf(listOfAppsPaged[0])
+    }
+
     private fun isSystemPackage(pkgInfo: ApplicationInfo): Boolean {
         return pkgInfo.flags and ApplicationInfo.FLAG_SYSTEM != 0
     }

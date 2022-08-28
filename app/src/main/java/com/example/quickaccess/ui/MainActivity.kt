@@ -18,6 +18,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.quickaccess.MainApplication
 import com.example.quickaccess.MainViewModel
 import com.example.quickaccess.R
 import com.example.quickaccess.data.AppAdapter
