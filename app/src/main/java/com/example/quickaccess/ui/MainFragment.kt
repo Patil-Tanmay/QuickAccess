@@ -1,6 +1,7 @@
 package com.example.quickaccess.ui
 
 import android.animation.Animator
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -21,6 +22,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -92,6 +96,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     }//end of onCreate
 
     private fun initView() {
+        hideSystemUi()
         if (prefs.isDarkTheme) {
             binding.setTheme.setImageDrawable(
                 AppCompatResources.getDrawable(requireContext(), R.drawable.ic_lightbulb_filed)
@@ -181,6 +186,16 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 
         appListing.appList.observe(viewLifecycleOwner){
             adapter.submitList(it)
+        }
+    }
+
+    @SuppressLint("InlinedApi")
+    private fun hideSystemUi() {
+        WindowCompat.setDecorFitsSystemWindows(requireActivity().window, false)
+        WindowInsetsControllerCompat(requireActivity().window, binding.root).let { controller ->
+            controller.hide(WindowInsetsCompat.Type.navigationBars())
+            controller.systemBarsBehavior =
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         }
     }
 
