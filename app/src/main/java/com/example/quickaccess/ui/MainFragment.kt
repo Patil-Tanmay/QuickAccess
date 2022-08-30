@@ -4,9 +4,7 @@ import android.animation.Animator
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.drawable.ColorDrawable
-import android.graphics.drawable.Icon
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -21,7 +19,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -32,6 +29,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.quickaccess.MainViewModel
 import com.example.quickaccess.R
 import com.example.quickaccess.data.AppAdapter
@@ -41,7 +39,6 @@ import com.example.quickaccess.databinding.BottomsheetQuickSettingBinding
 import com.example.quickaccess.databinding.DialogQuickSettingBinding
 import com.example.quickaccess.databinding.FragmentMainBinding
 import com.example.quickaccess.prefs
-import com.example.quickaccess.service.QuickAccessService
 import com.example.quickaccess.service.QuickAccessService.Companion.isTileAdded
 import com.example.quickaccess.utils.*
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -131,6 +128,26 @@ class MainFragment : Fragment(R.layout.fragment_main) {
                 (requireActivity() as OnThemeChangeCallBack).onThemeChanged(true)
             }
         }
+
+        binding.recView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+//                if (!recyclerView.canScrollVertically(1)){
+//                    viewModel.getNextPagedList()
+//                }
+                //todo here also check for search query is empty or not
+                val visibleItemCount: Int = recyclerView.layoutManager?.childCount!!
+                val totalItemCount: Int = recyclerView.layoutManager?.itemCount!!
+                val pastVisibleItems: Int = (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+                if (pastVisibleItems + visibleItemCount >= totalItemCount - 10) {
+                    if (viewModel.currentQuery!=null){
+                     viewModel.filterAppListNextPage()
+                    }else {
+                        viewModel.getNextPagedList()
+                    }
+                }
+            }
+        })
     }
 
     private fun initQuickSettingDialog() {
@@ -145,48 +162,48 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     }
 
     private fun setUpObservers() {
-//        viewLifecycleOwner.lifecycleScope.launch {
-//            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-//
-//                launch {
-//                    viewModel.appListFlow.collect { resource ->
-//                        when (resource) {
-//                            is Resource.Loading -> {
-//                                binding.pBar.visibility = View.VISIBLE
-//                                binding.refreshLayout.isRefreshing = true
-//                                binding.recView.visibility = View.GONE
-//                            }
-//
-//                            is Resource.Success -> {
-//                                binding.pBar.visibility = View.GONE
-//                                binding.refreshLayout.isRefreshing = false
-//                                binding.recView.visibility = View.VISIBLE
-//
-////                                Log.e("SubList", "chucked: ${resource.data?.chunked(5)}")
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+
+                launch {
+                    viewModel.appListFlow.collect { resource ->
+                        when (resource) {
+                            is Resource.Loading -> {
+                                binding.pBar.visibility = View.VISIBLE
+                                binding.refreshLayout.isRefreshing = true
+                                binding.recView.visibility = View.GONE
+                            }
+
+                            is Resource.Success -> {
+                                binding.pBar.visibility = View.GONE
+                                binding.refreshLayout.isRefreshing = false
+                                binding.recView.visibility = View.VISIBLE
+
+//                                Log.e("SubList", "chucked: ${resource.data?.chunked(5)}")
 //                                Log.i("SubList", "windowed: ${resource.data?.windowed(18,3,partialWindows = true)
 //                                    ?.get(0)?.size}")
-//
-//                                adapter.setAppData(resource.data!!)
-//                                adapter.notifyDataSetChanged()
-//
-//                            }
-//                            is Resource.Error -> {
-//                                binding.pBar.visibility = View.GONE
-//                                binding.refreshLayout.isRefreshing = false
-//                                binding.recView.visibility = View.VISIBLE
-//
-//                                Snackbar.make(binding.root, "Error! Please relaunch the app.", Snackbar.LENGTH_SHORT).show()
-//                            }
-//                        }
-//
-//                    }
-//                }
-//            }
-//        }
 
-        appListing.appList.observe(viewLifecycleOwner){
-            adapter.submitList(it)
+                                adapter.submitList(resource.data!!)
+                                adapter.notifyDataSetChanged()
+
+                            }
+                            is Resource.Error -> {
+                                binding.pBar.visibility = View.GONE
+                                binding.refreshLayout.isRefreshing = false
+                                binding.recView.visibility = View.VISIBLE
+
+                                Snackbar.make(binding.root, "Error! Please relaunch the app.", Snackbar.LENGTH_SHORT).show()
+                            }
+                        }
+
+                    }
+                }
+            }
         }
+
+//        appListing.appList.observe(viewLifecycleOwner){
+//            adapter.submitList(it)
+//        }
     }
 
     @SuppressLint("InlinedApi")
@@ -278,9 +295,11 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     private fun openSearch() {
         binding.searchInputText.addTextChangedListener {
             if (!binding.searchInputText.text.isNullOrBlank()) {
-                viewModel.filterAppList(it.toString())
+//                viewModel.filterAppList(it.toString())
+                viewModel.filterAppListPaged(it.toString())
             } else if (binding.searchInputText.text.isBlank()) {
-                viewModel.filterAppList("")
+//                viewModel.filterAppList("")
+                viewModel.filterAppListPaged("")
             }
         }
 

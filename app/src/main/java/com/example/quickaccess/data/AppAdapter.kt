@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.quickaccess.databinding.ItemAppBinding
 
@@ -11,7 +12,7 @@ class AppAdapter constructor(
     val onSelect : (String) -> Unit,
     val onUninstall: (String) -> Unit,
     val onLongPress: (AppDetails) -> Unit
-) : PagedListAdapter<AppDetails,AppAdapter.AppViewHolder>(APP_COMPARATOR){
+) : ListAdapter<AppDetails,AppAdapter.AppViewHolder>(APP_COMPARATOR){
 
     private var list  = arrayListOf<AppDetails>()
 
