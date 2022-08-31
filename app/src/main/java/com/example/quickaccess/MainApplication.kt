@@ -3,6 +3,7 @@ package com.example.quickaccess
 import android.app.Application
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import androidx.core.graphics.drawable.toBitmap
 import com.example.quickaccess.data.AppDetails
 import dagger.hilt.android.HiltAndroidApp
 import com.example.quickaccess.utils.PreferenceHelper
@@ -39,7 +40,7 @@ class MainApplication : Application() {
                     AppDetails(
                         packageName = applicationInfo.packageName,
                         name = packageManager.getApplicationLabel(applicationInfo).toString(),
-                        image = applicationInfo.loadIcon(packageManager),
+                        image = applicationInfo.loadIcon(packageManager).toBitmap(),
                         isSystemPackage = isSystemPackage(applicationInfo)
                     )
                 }

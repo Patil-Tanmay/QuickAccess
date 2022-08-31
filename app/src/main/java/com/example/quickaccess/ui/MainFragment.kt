@@ -252,7 +252,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
             subQuickAccessText.alpha = 0.6f
             subDemoText.alpha = 0.6f
 
-            appLogo.setImageDrawable(app.image)
+            appLogo.setImageBitmap(app.image)
 
             if (prefs.isDarkTheme) {
                 logo.setImageResource(R.drawable.ic_android_4)
@@ -284,22 +284,22 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         }
     }
 
-    private fun onUninstall(packageName: String) {
+    private fun onUninstall(app: AppDetails) {
+        viewModel.setAppForUnInstall(app)
         val intent = Intent(Intent.ACTION_DELETE)
-        intent.data = Uri.parse("package:$packageName")
+        intent.data = Uri.parse("package:${app.packageName}")
         intent.putExtra(Intent.EXTRA_RETURN_RESULT, true)
         unInstallApp.launch(intent)
-
     }
 
     private fun openSearch() {
         binding.searchInputText.addTextChangedListener {
             if (!binding.searchInputText.text.isNullOrBlank()) {
 //                viewModel.filterAppList(it.toString())
-                viewModel.filterAppListPaged(it.toString())
+                viewModel.filterAppListPaged(it.toString(), false)
             } else if (binding.searchInputText.text.isBlank()) {
 //                viewModel.filterAppList("")
-                viewModel.filterAppListPaged("")
+                viewModel.filterAppListPaged("", false)
             }
         }
 
@@ -346,9 +346,10 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     private val unInstallApp =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == AppCompatActivity.RESULT_OK) {
-                viewModel.onRefresh()
-                Toast.makeText(requireContext(), "Successfully Uninstalled", Toast.LENGTH_SHORT)
-                    .show()
+                viewModel.onUnInstall(true)
+                Toast.makeText(requireContext(), "Successfully Uninstalled", Toast.LENGTH_SHORT).show()
+            }else{
+                viewModel.onUnInstall(false)
             }
         }
 }

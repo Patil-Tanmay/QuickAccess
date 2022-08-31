@@ -10,7 +10,7 @@ import com.example.quickaccess.databinding.ItemAppBinding
 
 class AppAdapter constructor(
     val onSelect : (String) -> Unit,
-    val onUninstall: (String) -> Unit,
+    val onUninstall: (AppDetails) -> Unit,
     val onLongPress: (AppDetails) -> Unit
 ) : ListAdapter<AppDetails,AppAdapter.AppViewHolder>(APP_COMPARATOR){
 
@@ -40,14 +40,14 @@ class AppAdapter constructor(
 
         fun bind(app : AppDetails){
             binding.name.text = app.name
-            binding.imgView.setImageDrawable(app.image)
+            binding.imgView.setImageBitmap(app.image)
 
             binding.root.setOnClickListener {
                 onSelect(app.packageName)
             }
 
             binding.btnUnInstall.setOnClickListener {
-                onUninstall(app.packageName)
+                onUninstall(app)
             }
 
             binding.root.setOnLongClickListener {

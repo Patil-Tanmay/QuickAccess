@@ -3,6 +3,7 @@ package com.example.quickaccess
 import android.app.Application
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.*
 import androidx.paging.DataSource
 import androidx.paging.PagedList
@@ -38,9 +39,11 @@ class MainViewModel @Inject constructor(val app: Application) : AndroidViewModel
 
     private var searchPageNo: Int = 0
 
-    private var searchPages : Int = 0
+    private var searchPages: Int = 0
 
     private var currentPagedList = arrayListOf<AppDetails>()
+
+    private var currentPagedFilterList = arrayListOf<AppDetails>()
 
     private var searchListPaged = arrayListOf<List<AppDetails>>()
 
@@ -59,7 +62,7 @@ class MainViewModel @Inject constructor(val app: Application) : AndroidViewModel
                         AppDetails(
                             packageName = applicationInfo.packageName,
                             name = packageManager.getApplicationLabel(applicationInfo).toString(),
-                            image = applicationInfo.loadIcon(packageManager),
+                            image = applicationInfo.loadIcon(packageManager).toBitmap(),
                             isSystemPackage = isSystemPackage(applicationInfo)
                         )
                     }
@@ -116,19 +119,32 @@ class MainViewModel @Inject constructor(val app: Application) : AndroidViewModel
         }
     }
 
-    fun filterAppListPaged(appName: String) {
+    fun filterAppListPaged(appName: String, toBeRefreshed: Boolean) {
         viewModelScope.launch {
+            _appList.emit(Resource.Loading)
             if (appName != "") {
                 searchPageNo = 0
+                currentPagedFilterList.clear()
                 searchListPaged.clear()
-                val newList = appList.filter {
-                    it.name.contains(appName, true)
-                }.chunked(20)
-                searchPages = newList.lastIndex
-                searchListPaged.addAll(newList)
-                searchPageNo += 1
-                setQuery(appName)
-                _appList.emit(Resource.Success(newList[0]))
+                val newList = if (toBeRefreshed) {
+                    getAppList().filter {
+                        it.name.contains(appName, true)
+                    }.chunked(20)
+                } else {
+                    appList.filter {
+                        it.name.contains(appName, true)
+                    }.chunked(20)
+                }
+                if (newList.isEmpty()) {
+                    _appList.emit(Resource.Success(currentPagedFilterList))
+                }else{
+                    searchPages = newList.lastIndex
+                    searchListPaged.addAll(newList)
+                    currentPagedFilterList.addAll(newList[0])
+                    searchPageNo += 1
+                    setQuery(appName)
+                    _appList.emit(Resource.Success(newList[0]))
+                }
             } else {
 //                currentPageNo = 1
                 setQuery(null)
@@ -138,10 +154,27 @@ class MainViewModel @Inject constructor(val app: Application) : AndroidViewModel
         }
     }
 
+    private fun getAppList(): List<AppDetails> {
+        val pm = app.packageManager
+
+        return pm.getInstalledApplications(PackageManager.GET_META_DATA)
+            .filter {
+                pm.getLaunchIntentForPackage(it.packageName) != null
+            }.map { applicationInfo ->
+                AppDetails(
+                    packageName = applicationInfo.packageName,
+                    name = pm.getApplicationLabel(applicationInfo).toString(),
+                    image = applicationInfo.loadIcon(pm).toBitmap(),
+                    isSystemPackage = isSystemPackage(applicationInfo)
+                )
+            }
+    }
+
     fun filterAppListNextPage() {
         viewModelScope.launch {
             if (searchPageNo < searchPages) {
-                _appList.emit(Resource.Success(searchListPaged[searchPageNo]))
+                currentPagedFilterList.addAll(searchListPaged[searchPageNo])
+                _appList.emit(Resource.Success(currentPagedFilterList))
                 searchPageNo += 1
             }
         }
@@ -153,7 +186,36 @@ class MainViewModel @Inject constructor(val app: Application) : AndroidViewModel
     }
 
     fun onRefresh() {
-        getList(app.packageManager, 0)
+        if (currentQuery == null) {
+            getList(app.packageManager, 0)
+        } else {
+            filterAppListPaged(currentQuery!!, true)
+        }
+    }
+
+    private var currentAppForUnInstall: AppDetails? = null
+    fun setAppForUnInstall(app: AppDetails) {
+        currentAppForUnInstall = app
+    }
+
+    fun onUnInstall(unInstalled: Boolean) {
+        viewModelScope.launch {
+            if (unInstalled) {
+                if (!currentAppForUnInstall?.isSystemPackage!!) {
+                    if (currentQuery == null) {
+                        appList.remove(currentAppForUnInstall!!)
+                        currentPagedList.remove(currentAppForUnInstall)
+                        _appList.emit(Resource.Success(currentPagedList))
+                    } else {
+                        appList.remove(currentAppForUnInstall!!)
+                        currentPagedFilterList.remove(currentAppForUnInstall)
+                        _appList.emit(Resource.Success(currentPagedFilterList))
+                    }
+                }
+            }else{
+                currentAppForUnInstall = null
+            }
+        }
     }
 
     private fun isSystemPackage(pkgInfo: ApplicationInfo): Boolean {
