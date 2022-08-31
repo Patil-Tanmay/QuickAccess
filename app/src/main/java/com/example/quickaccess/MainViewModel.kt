@@ -160,6 +160,7 @@ class MainViewModel @Inject constructor(val app: Application) : AndroidViewModel
         return pkgInfo.flags and ApplicationInfo.FLAG_SYSTEM != 0
     }
 
+    //paging 2 Impl
     fun getPagedAppList(): AppListing {
         val sourceFactory = AppDataSourceFactory(
             scope = viewModelScope,
