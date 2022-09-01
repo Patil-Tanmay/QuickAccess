@@ -83,7 +83,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         view.startCircularReveal()
-        appListing = viewModel.getPagedAppList()
+//        appListing = viewModel.getPagedAppList()
         initQuickSettingDialog()
         adapter = AppAdapter(::onSelect, ::onUninstall, ::setPackageNameForQuickAccess)
         setupRecView(adapter)
@@ -130,20 +130,29 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         }
 
         binding.recView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+            }
+
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
 //                if (!recyclerView.canScrollVertically(1)){
 //                    viewModel.getNextPagedList()
 //                }
                 //todo here also check for search query is empty or not
-                val visibleItemCount: Int = recyclerView.layoutManager?.childCount!!
-                val totalItemCount: Int = recyclerView.layoutManager?.itemCount!!
-                val pastVisibleItems: Int = (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
-                if (pastVisibleItems + visibleItemCount >= totalItemCount - 10) {
-                    if (viewModel.currentQuery!=null){
-                     viewModel.filterAppListNextPage()
-                    }else {
-                        viewModel.getNextPagedList()
+                if (dy > 0) {
+                    Log.i("TAGG", "onScrolled: ${dy} ")
+                    val visibleItemCount: Int = recyclerView.layoutManager?.childCount!!
+                    val totalItemCount: Int = recyclerView.layoutManager?.itemCount!!
+                    val pastVisibleItems: Int =
+                        (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+                    if (pastVisibleItems + visibleItemCount >= totalItemCount - 10) {
+                        if (viewModel.currentQuery != null) {
+                            viewModel.filterAppListNextPage()
+                        } else {
+                            viewModel.getNextPagedList()
+                        }
                     }
                 }
             }
@@ -182,7 +191,6 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 //                                Log.e("SubList", "chucked: ${resource.data?.chunked(5)}")
 //                                Log.i("SubList", "windowed: ${resource.data?.windowed(18,3,partialWindows = true)
 //                                    ?.get(0)?.size}")
-
                                 adapter.submitList(resource.data!!)
                                 adapter.notifyDataSetChanged()
 
@@ -192,10 +200,22 @@ class MainFragment : Fragment(R.layout.fragment_main) {
                                 binding.refreshLayout.isRefreshing = false
                                 binding.recView.visibility = View.VISIBLE
 
-                                Snackbar.make(binding.root, "Error! Please relaunch the app.", Snackbar.LENGTH_SHORT).show()
+                                Snackbar.make(
+                                    binding.root,
+                                    "Error! Please relaunch the app.",
+                                    Snackbar.LENGTH_SHORT
+                                ).show()
                             }
                         }
 
+                    }
+                }
+
+                launch {
+                    viewModel.updateAppListAfterUnInstall.collect{ list ->
+//                        val index = adapter.currentList.indexOf(viewModel.currentAppForUnInstall)
+                        adapter.submitList(list)
+                        adapter.notifyItemRemoved(viewModel.currentAppForUnInstallPosition)
                     }
                 }
             }
@@ -216,7 +236,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         }
     }
 
-    private fun encodeImageDrawable(realImage: Bitmap){
+    private fun encodeImageDrawable(realImage: Bitmap) {
         val baos = ByteArrayOutputStream()
         realImage.compress(Bitmap.CompressFormat.WEBP, 100, baos)
         val b: ByteArray = baos.toByteArray()
@@ -270,10 +290,18 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 
             quickAccessLayout.setOnClickListener {
                 prefs.quickAccessAppName = app.packageName
-                if (!isTileAdded){
-                    Snackbar.make(binding.root, "Please add App to the Quick Tile to access this feature.", Snackbar.LENGTH_LONG).show()
-                }else {
-                    Snackbar.make(binding.root, "Successfully Set App For Quick Setting", Snackbar.LENGTH_SHORT).show()
+                if (!isTileAdded) {
+                    Snackbar.make(
+                        binding.root,
+                        "Please add App to the Quick Tile to access this feature.",
+                        Snackbar.LENGTH_LONG
+                    ).show()
+                } else {
+                    Snackbar.make(
+                        binding.root,
+                        "Successfully Set App For Quick Setting",
+                        Snackbar.LENGTH_SHORT
+                    ).show()
                 }
                 bottomsheet.dismiss()
             }
@@ -284,8 +312,8 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         }
     }
 
-    private fun onUninstall(app: AppDetails) {
-        viewModel.setAppForUnInstall(app)
+    private fun onUninstall(app: AppDetails, position: Int) {
+        viewModel.setAppForUnInstall(app, position)
         val intent = Intent(Intent.ACTION_DELETE)
         intent.data = Uri.parse("package:${app.packageName}")
         intent.putExtra(Intent.EXTRA_RETURN_RESULT, true)
@@ -348,7 +376,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
             if (it.resultCode == AppCompatActivity.RESULT_OK) {
                 viewModel.onUnInstall(true)
                 Toast.makeText(requireContext(), "Successfully Uninstalled", Toast.LENGTH_SHORT).show()
-            }else{
+            } else {
                 viewModel.onUnInstall(false)
             }
         }
