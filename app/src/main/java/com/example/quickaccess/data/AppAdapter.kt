@@ -10,7 +10,7 @@ import com.example.quickaccess.databinding.ItemAppBinding
 
 class AppAdapter constructor(
     val onSelect : (String) -> Unit,
-    val onUninstall: (AppDetails) -> Unit,
+    val onUninstall: (AppDetails, position:Int) -> Unit,
     val onLongPress: (AppDetails) -> Unit
 ) : ListAdapter<AppDetails,AppAdapter.AppViewHolder>(APP_COMPARATOR){
 
@@ -47,7 +47,7 @@ class AppAdapter constructor(
             }
 
             binding.btnUnInstall.setOnClickListener {
-                onUninstall(app)
+                onUninstall(app, adapterPosition)
             }
 
             binding.root.setOnLongClickListener {
