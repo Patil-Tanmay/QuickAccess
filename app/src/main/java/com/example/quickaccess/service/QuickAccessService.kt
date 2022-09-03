@@ -8,6 +8,7 @@ import android.os.Build
 import android.service.quicksettings.TileService
 import android.util.Base64
 import androidx.annotation.RequiresApi
+import com.example.quickaccess.R
 import com.example.quickaccess.utils.PreferenceHelper
 
 
@@ -41,14 +42,13 @@ class QuickAccessService : TileService() {
                         applicationInfo.packageName
                     )
                 }
-        qsTile.state
         if (listOfApps.map { it.packageName }.contains(prefs.quickAccessAppName)) {
             val imageInfo = listOfApps.map { it.packageName }.indexOf(prefs.quickAccessAppName)
             qsTile.label = listOfApps[imageInfo].name
             quickAccessPackageName = listOfApps[imageInfo].packageName
             qsTile.updateTile()
         }else{
-            qsTile.label = applicationInfo.name
+            qsTile.label = "Quick Access"
             quickAccessPackageName = applicationInfo.packageName
             qsTile.updateTile()
         }

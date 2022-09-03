@@ -14,19 +14,18 @@ import com.example.quickaccess.data.AppDetails
 import com.example.quickaccess.data.AppListing
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import com.example.quickaccess.utils.Resource
 import com.example.quickaccess.utils.UiState
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import javax.inject.Inject
 
 data class AppListingPaged(
     var currentPageNo: Int = 0,
-    var totalPages : Int = 0,
+    var totalPages: Int = 0,
     var appListPaged: ArrayList<List<AppDetails>> = arrayListOf(),
     var currentPagedList: ArrayList<AppDetails> = arrayListOf(),
-    var appList : ArrayList<AppDetails> = arrayListOf()
+    var appList: ArrayList<AppDetails> = arrayListOf()
 )
 
 @HiltViewModel
@@ -37,7 +36,7 @@ class MainViewModel @Inject constructor(val app: Application) : AndroidViewModel
 
     private var appList = arrayListOf<AppDetails>()
 
-    private lateinit var appListingPaged : AppListingPaged
+    private lateinit var appListingPaged: AppListingPaged
 
     private var appListPaged = arrayListOf<List<AppDetails>>()
 
@@ -58,30 +57,22 @@ class MainViewModel @Inject constructor(val app: Application) : AndroidViewModel
     private var searchListPaged = arrayListOf<List<AppDetails>>()
 
     init {
-        getList(app.packageManager, 0)
+        viewModelScope.launch {
+            getInitialData(app.packageManager, 0)
+        }
     }
 
-    private fun resetAppListing(){
+    private fun resetAppListing() {
     }
 
-    private fun getList(packageManager: PackageManager, pageNo: Int) {
+    private fun getInitialData(packageManager: PackageManager, pageNo: Int) {
         viewModelScope.launch {
             _appList.emit(Resource.Loading)
-            val listOfApps =
-                packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
-                    .filter {
-                        packageManager.getLaunchIntentForPackage(it.packageName) != null
-                    }.map { applicationInfo ->
-                        AppDetails(
-                            packageName = applicationInfo.packageName,
-                            name = packageManager.getApplicationLabel(applicationInfo).toString(),
-                            image = applicationInfo.loadIcon(packageManager).toBitmap(),
-                            isSystemPackage = isSystemPackage(applicationInfo)
-                        )
-                    }
+
+            val listOfApps = getList(packageManager)
             currentPageNo = pageNo
             appListPaged.clear()
-            appListPaged.addAll(listOfApps.chunked(10))
+            appListPaged.addAll(listOfApps.chunked(20))
             totalPages = appListPaged.lastIndex
             currentPagedList.clear()
             currentPagedList.addAll(appListPaged[pageNo])
@@ -90,21 +81,26 @@ class MainViewModel @Inject constructor(val app: Application) : AndroidViewModel
             appList.addAll(listOfApps)
             _appList.emit(Resource.Success(appListPaged[currentPageNo]))
         }
+    }
+
+    private suspend fun getList(packageManager: PackageManager) =
+        withContext(Dispatchers.IO) {
+            packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
+                .filter {
+                    packageManager.getLaunchIntentForPackage(it.packageName) != null
+                }.parallelMap { applicationInfo ->
+                    AppDetails(
+                        packageName = applicationInfo.packageName,
+                        name = packageManager.getApplicationLabel(applicationInfo).toString(),
+                        image = applicationInfo.loadIcon(packageManager).toBitmap(),
+                        isSystemPackage = isSystemPackage(applicationInfo)
+                    )
+                }
+        }
 
 
-        //old Working
-//        viewModelScope.launch {
-//            _appList.emit(Resource.Loading)
-//            if (currentQuery != null) {
-//                appList.clear()
-//                appList.addAll(MainApplication.listOfApps)
-//                filterAppList(currentQuery!!)
-//            } else {
-//                appList.clear()
-//                appList.addAll(MainApplication.listOfApps)
-//                _appList.emit(Resource.Success(MainApplication.listOfApps))
-//            }
-//        }
+    suspend fun <A, B> Iterable<A>.parallelMap(f: suspend (A) -> B): List<B> = coroutineScope {
+        map { async { f(it) } }.awaitAll()
     }
 
     fun getNextPagedList() {
@@ -150,7 +146,7 @@ class MainViewModel @Inject constructor(val app: Application) : AndroidViewModel
                 }
                 if (newList.isEmpty()) {
                     _appList.emit(Resource.Success(currentPagedFilterList))
-                }else{
+                } else {
                     searchPages = newList.lastIndex
                     searchListPaged.addAll(newList)
                     currentPagedFilterList.addAll(newList[0])
@@ -160,7 +156,7 @@ class MainViewModel @Inject constructor(val app: Application) : AndroidViewModel
                 }
             } else {
                 setQuery(null)
-                getList(packageManager = app.packageManager, 0)
+                getInitialData(packageManager = app.packageManager, 0)
             }
         }
     }
@@ -198,7 +194,7 @@ class MainViewModel @Inject constructor(val app: Application) : AndroidViewModel
 
     fun onRefresh() {
         if (currentQuery == null) {
-            getList(app.packageManager, 0)
+            getInitialData(app.packageManager, 0)
         } else {
             filterAppListPaged(currentQuery!!, true)
         }
@@ -206,8 +202,8 @@ class MainViewModel @Inject constructor(val app: Application) : AndroidViewModel
 
     private var currentAppForUnInstall: AppDetails? = null
     var currentAppForUnInstallPosition: Int = 0
-    private var _updateAppListAfterUnInstall  = Channel<List<AppDetails>>()
-    val updateAppListAfterUnInstall get() =  _updateAppListAfterUnInstall.receiveAsFlow()
+    private var _updateAppListAfterUnInstall = Channel<List<AppDetails>>()
+    val updateAppListAfterUnInstall get() = _updateAppListAfterUnInstall.receiveAsFlow()
     fun setAppForUnInstall(app: AppDetails, position: Int) {
         currentAppForUnInstall = app
         currentAppForUnInstallPosition = position
@@ -229,7 +225,7 @@ class MainViewModel @Inject constructor(val app: Application) : AndroidViewModel
                         _appList.emit(Resource.Success(currentPagedFilterList))
                     }
                 }
-            }else{
+            } else {
                 currentAppForUnInstall = null
             }
         }

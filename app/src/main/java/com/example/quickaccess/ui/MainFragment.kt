@@ -147,7 +147,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
                     val totalItemCount: Int = recyclerView.layoutManager?.itemCount!!
                     val pastVisibleItems: Int =
                         (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
-                    if (pastVisibleItems + visibleItemCount >= totalItemCount - 10) {
+                    if (pastVisibleItems + visibleItemCount >= totalItemCount - 6) {
                         if (viewModel.currentQuery != null) {
                             viewModel.filterAppListNextPage()
                         } else {
@@ -192,7 +192,11 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 //                                Log.i("SubList", "windowed: ${resource.data?.windowed(18,3,partialWindows = true)
 //                                    ?.get(0)?.size}")
                                 adapter.submitList(resource.data!!)
-                                adapter.notifyDataSetChanged()
+                                if (resource.data.size>20){
+                                    adapter.notifyItemRangeChanged(adapter.currentList.size, resource.data.size)
+                                }else{
+                                    adapter.notifyDataSetChanged()
+                                }
 
                             }
                             is Resource.Error -> {

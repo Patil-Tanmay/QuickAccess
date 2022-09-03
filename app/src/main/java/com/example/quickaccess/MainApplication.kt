@@ -32,32 +32,8 @@ class MainApplication : Application() {
         super.onCreate()
 
         instance = this
-        listOfApps =
-            packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
-                .filter {
-                    packageManager.getLaunchIntentForPackage(it.packageName) != null
-                }.map { applicationInfo ->
-                    AppDetails(
-                        packageName = applicationInfo.packageName,
-                        name = packageManager.getApplicationLabel(applicationInfo).toString(),
-                        image = applicationInfo.loadIcon(packageManager).toBitmap(),
-                        isSystemPackage = isSystemPackage(applicationInfo)
-                    )
-                }
-
-        listOfAppsPaged = listOfApps.chunked(20)
-
-        pages = listOfAppsPaged.size
         prefs = PreferenceHelper(applicationContext)
 
-    }
-
-    fun refreshAppList(){
-        listOfAppsPaged = listOf(listOfAppsPaged[0])
-    }
-
-    private fun isSystemPackage(pkgInfo: ApplicationInfo): Boolean {
-        return pkgInfo.flags and ApplicationInfo.FLAG_SYSTEM != 0
     }
 
 }
