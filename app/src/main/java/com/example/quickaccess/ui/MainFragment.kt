@@ -24,6 +24,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -34,7 +35,6 @@ import com.example.quickaccess.MainViewModel
 import com.example.quickaccess.R
 import com.example.quickaccess.data.AppAdapter
 import com.example.quickaccess.data.AppDetails
-import com.example.quickaccess.data.AppListing
 import com.example.quickaccess.databinding.BottomsheetQuickSettingBinding
 import com.example.quickaccess.databinding.DialogQuickSettingBinding
 import com.example.quickaccess.databinding.FragmentMainBinding
@@ -43,6 +43,7 @@ import com.example.quickaccess.service.QuickAccessService.Companion.isTileAdded
 import com.example.quickaccess.utils.*
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 
@@ -53,12 +54,10 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 
     private lateinit var adapter: AppAdapter
 
-    private val viewModel by viewModels<MainViewModel>()
+    private val viewModel by activityViewModels<MainViewModel>()
 
     private lateinit var dialogQuickSettingBinding: DialogQuickSettingBinding
     private lateinit var dialog: AlertDialog
-
-    private lateinit var appListing: AppListing
 
     interface OnThemeChangeCallBack {
         fun onThemeChanged(isChanged: Boolean)
@@ -105,17 +104,20 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         }
 
         binding.openSearchButton.setOnClickListener {
+            viewModel.isSearchViewOpen = true
             binding.searchInputText.requestFocus()
             binding.searchInputText.showKeyBoard()
             openSearch()
         }
         binding.closeSearchButton.setOnClickListener {
+            viewModel.isSearchViewOpen = false
             viewModel.setQuery(null)
             this.hideKeyboard()
             closeSearch()
         }
 
         binding.refreshLayout.setOnRefreshListener {
+            binding.refreshLayout.isRefreshing =false
             viewModel.onRefresh()
         }
 
@@ -140,9 +142,8 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 //                if (!recyclerView.canScrollVertically(1)){
 //                    viewModel.getNextPagedList()
 //                }
-                //todo here also check for search query is empty or not
                 if (dy > 0) {
-                    Log.i("TAGG", "onScrolled: ${dy} ")
+//                    Log.i("TAGG", "onScrolled: $dy ")
                     val visibleItemCount: Int = recyclerView.layoutManager?.childCount!!
                     val totalItemCount: Int = recyclerView.layoutManager?.itemCount!!
                     val pastVisibleItems: Int =
@@ -170,6 +171,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     private fun setUpObservers() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -179,7 +181,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
                         when (resource) {
                             is Resource.Loading -> {
                                 binding.pBar.visibility = View.VISIBLE
-                                binding.refreshLayout.isRefreshing = true
+                                binding.refreshLayout.isRefreshing = false
                                 binding.recView.visibility = View.GONE
                             }
 
@@ -188,14 +190,9 @@ class MainFragment : Fragment(R.layout.fragment_main) {
                                 binding.refreshLayout.isRefreshing = false
                                 binding.recView.visibility = View.VISIBLE
 
-//                                Log.e("SubList", "chucked: ${resource.data?.chunked(5)}")
-//                                Log.i("SubList", "windowed: ${resource.data?.windowed(18,3,partialWindows = true)
-//                                    ?.get(0)?.size}")
                                 adapter.submitList(resource.data!!)
-                                if (resource.data.size>20){
+                                if (resource.data.size>20) {
                                     adapter.notifyItemRangeChanged(adapter.currentList.size, resource.data.size)
-                                }else{
-                                    adapter.notifyDataSetChanged()
                                 }
 
                             }
@@ -204,11 +201,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
                                 binding.refreshLayout.isRefreshing = false
                                 binding.recView.visibility = View.VISIBLE
 
-                                Snackbar.make(
-                                    binding.root,
-                                    "Error! Please relaunch the app.",
-                                    Snackbar.LENGTH_SHORT
-                                ).show()
+                                Snackbar.make(binding.root, "Error! Please relaunch the app.", Snackbar.LENGTH_SHORT).show()
                             }
                         }
 
@@ -216,10 +209,24 @@ class MainFragment : Fragment(R.layout.fragment_main) {
                 }
 
                 launch {
+                    viewModel.totalApps.collect{ binding.totalNoOfApps.text = "($it Apps)" }
+                }
+
+                launch {
                     viewModel.updateAppListAfterUnInstall.collect{ list ->
 //                        val index = adapter.currentList.indexOf(viewModel.currentAppForUnInstall)
                         adapter.submitList(list)
                         adapter.notifyItemRemoved(viewModel.currentAppForUnInstallPosition)
+                    }
+                }
+
+                launch {
+                    viewModel.closeSearchView.collect{
+                        if (it){
+                            viewModel.isSearchViewOpen = false
+                            viewModel.setQuery(null)
+                            closeSearch()
+                        }
                     }
                 }
             }
@@ -242,7 +249,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
 
     private fun encodeImageDrawable(realImage: Bitmap) {
         val baos = ByteArrayOutputStream()
-        realImage.compress(Bitmap.CompressFormat.WEBP, 100, baos)
+        realImage.compress(Bitmap.CompressFormat.JPEG, 100, baos)
         val b: ByteArray = baos.toByteArray()
 
         val encodedImage: String = Base64.encodeToString(b, Base64.DEFAULT)

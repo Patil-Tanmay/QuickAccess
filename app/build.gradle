@@ -73,7 +73,5 @@ dependencies {
     //GifImageView
     implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.25'
 
-    //pagin 2
-    implementation "androidx.paging:paging-runtime-ktx:2.1.2"
 
 }

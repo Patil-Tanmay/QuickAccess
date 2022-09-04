@@ -79,6 +79,14 @@ class MainActivity : AppCompatActivity(), MainFragment.OnThemeChangeCallBack {
         }
     }
 
+    override fun onBackPressed() {
+        if (viewModel.isSearchViewOpen){
+            viewModel.closeSearchView()
+        }else {
+            super.onBackPressed()
+        }
+    }
+
     companion object {
         private const val MainActivityTag: String = "TAGG"
     }

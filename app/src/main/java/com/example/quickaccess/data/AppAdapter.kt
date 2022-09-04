@@ -2,7 +2,6 @@ package com.example.quickaccess.data
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -40,6 +39,7 @@ class AppAdapter constructor(
 
         fun bind(app : AppDetails){
             binding.name.text = app.name
+            binding.packageName.text = app.packageName
             binding.imgView.setImageBitmap(app.image)
 
             binding.root.setOnClickListener {

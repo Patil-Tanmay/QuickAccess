@@ -4,10 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginHorizontal="8dp"
     android:layout_marginVertical="4dp"
     android:clickable="true"
     android:focusable="true"
-    android:layout_marginHorizontal="8dp"
     app:cardCornerRadius="4dp"
     app:cardElevation="5dp">
 
@@ -25,19 +25,35 @@
             android:scaleType="centerCrop"
             tools:src="@color/black" />
 
-
-        <TextView
-            android:id="@+id/name"
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:layout_weight="1"
             android:layout_marginStart="2dp"
             android:layout_marginEnd="2dp"
-            android:maxLines="2"
-            android:fontFamily="@font/google_sans_medium"
-            android:textSize="19sp"
-            tools:text="test1 test2 test3 kssecs" />
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/google_sans_medium"
+                android:maxLines="2"
+                android:textSize="19sp"
+                tools:text="test1 test2 test 4 test5 test6 test3 kssecs" />
+
+            <TextView
+                android:id="@+id/packageName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/google_sans_medium"
+                android:maxLines="2"
+                android:textSize="14sp"
+                android:alpha="0.6"
+                tools:text="test1 test2 test4 test5 test6  test3 kssecs" />
+
+        </LinearLayout>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnUnInstall"
@@ -46,9 +62,9 @@
             android:layout_gravity="center_vertical"
             android:layout_marginEnd="6dp"
             android:fontFamily="@font/google_sans_medium"
-            app:cornerRadius="-10dp"
             android:text="UnInstall"
-            android:textAllCaps="false" />
+            android:textAllCaps="false"
+            app:cornerRadius="-10dp" />
 
     </LinearLayout>
 

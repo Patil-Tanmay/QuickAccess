@@ -1,4 +1,4 @@
-package com.example.quickaccess
+package com.example.quickaccess.utils
 
 import android.animation.Animator
 import android.content.Context
