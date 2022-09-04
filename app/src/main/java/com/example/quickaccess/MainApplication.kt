@@ -19,13 +19,6 @@ class MainApplication : Application() {
         var prefs: PreferenceHelper? = null
         lateinit var instance: MainApplication
             private set
-
-        lateinit var listOfAppsPaged : List<List<AppDetails>>
-
-        //temporary working solution
-        lateinit var listOfApps: List<AppDetails>
-
-        var pages : Int = 0
     }
 
     override fun onCreate() {
