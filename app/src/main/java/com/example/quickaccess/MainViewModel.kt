@@ -79,6 +79,20 @@ class MainViewModel @Inject constructor(val app: Application) : AndroidViewModel
         }
     }
 
+    private fun getAppList(pageNo: Int){
+        viewModelScope.launch {
+            _totalApps.emit(appList.size)
+            currentPageNo = pageNo
+            appListPaged.clear()
+            appListPaged.addAll(appList.chunked(20))
+            totalPages = appListPaged.lastIndex
+            currentPagedList.clear()
+            currentPagedList.addAll(appListPaged[pageNo])
+
+            _appList.emit(Resource.Success(appListPaged[currentPageNo]))
+        }
+    }
+
     private suspend fun getList(packageManager: PackageManager) =
         withContext(Dispatchers.IO) {
             packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
@@ -135,7 +149,8 @@ class MainViewModel @Inject constructor(val app: Application) : AndroidViewModel
                 }
             } else {
                 setQuery(null)
-                getInitialData(packageManager = app.packageManager, 0)
+//                getInitialData(packageManager = app.packageManager, 0)
+                getAppList(0)
             }
         }
     }

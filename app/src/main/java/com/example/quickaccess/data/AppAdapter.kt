@@ -2,9 +2,11 @@ package com.example.quickaccess.data
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.example.quickaccess.R
 import com.example.quickaccess.databinding.ItemAppBinding
 
 class AppAdapter constructor(
@@ -38,6 +40,9 @@ class AppAdapter constructor(
     ) : RecyclerView.ViewHolder(binding.root){
 
         fun bind(app : AppDetails){
+
+            binding.root.animation = AnimationUtils.loadAnimation(binding.root.context, R.anim.item_scale)
+
             binding.name.text = app.name
             binding.packageName.text = app.packageName
             binding.imgView.setImageBitmap(app.image)
